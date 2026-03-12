@@ -1,4 +1,4 @@
-const API_CANDIDATES = ["/api", "http://127.0.0.1:8001/api"];
+const API_CANDIDATES = ["/api", "http://127.0.0.1:8000/api"];
 
 const FALLBACK_OVERVIEW = {
   profile: {
