@@ -77,9 +77,18 @@ def parse_receipt_text(text):
 
     # Regex patterns
     # Item pattern: name followed by price (e.g., "Milk 120.00", "Milk $120.00", "Milk ₹120.00" or "Milk Rs 120.00")
-    item_pattern = re.compile(r'^(.+?)\s+(?:\$|₹|Rs\.?\s*)?(\d+(?:\.\d{2})?)$')
-    # Total pattern: various ways total is written (with optional currency symbols/abbreviations)
-    total_pattern = re.compile(r'(?:total|grand total|subtotal|amount due|balance)\s*:?\s*(?:\$|₹|Rs\.?\s*)?(\d+(?:\.\d{2})?)', re.IGNORECASE)
+    # Updated patterns to handle thousands separators (commas/spaces) and
+    # currency symbols/abbreviations in various positions.
+    # The numeric portion allows digits and commas, with an optional decimal part.
+    # amount_regex matches numbers with optional thousands commas and decimal
+    amount_regex = r"(\d[\d,]*(?:\.\d{2})?)"
+    item_pattern = re.compile(rf'^(.+?)\s+(?:\$|₹|Rs\.?\s*)?{amount_regex}$')
+    # Total pattern: look for total keywords then an amount. Currency may come
+    # before or after, and we capture the amount portion only.
+    total_pattern = re.compile(
+        rf'(?:total|grand total|subtotal|amount due|balance)\s*:?\s*(?:\$|₹|Rs\.?\s*)?{amount_regex}',
+        re.IGNORECASE,
+    )
 
     for line in lines:
         line = line.strip()
@@ -90,7 +99,8 @@ def parse_receipt_text(text):
         total_match = total_pattern.search(line)
         if total_match:
             try:
-                total = float(total_match.group(1))
+                raw_total = total_match.group(1).replace(",", "").replace(" ", "")
+                total = float(raw_total)
             except ValueError:
                 pass
             continue
@@ -103,7 +113,9 @@ def parse_receipt_text(text):
             if len(name) < 2 or re.search(r'total|subtotal|tax', name, re.IGNORECASE):
                 continue
             try:
-                price = float(item_match.group(2))
+                # strip commas/spaces from extracted amount before conversion
+                raw_amount = item_match.group(2).replace(",", "").replace(" ", "")
+                price = float(raw_amount)
                 items.append({"name": name, "price": price})
             except ValueError:
                 pass
@@ -111,6 +123,16 @@ def parse_receipt_text(text):
     # If no total found, sum the items
     if total is None and items:
         total = sum(item['price'] for item in items)
+
+    # sanity check: if total looks smaller than any individual item, it may be a
+    # mis-parse (e.g. commas were dropped).  In that case, fall back to sum.
+    if total is not None and items:
+        try:
+            min_price = min(item['price'] for item in items)
+            if total < min_price:
+                total = sum(item['price'] for item in items)
+        except ValueError:
+            pass
 
     return {
         "items": items,
