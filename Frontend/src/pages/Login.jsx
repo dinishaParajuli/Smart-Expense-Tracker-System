@@ -36,11 +36,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0b1120] p-6">
-      <div className="w-full max-w-6xl h-[680px] bg-[#111827] rounded-3xl shadow-2xl flex overflow-hidden">
+      <div className="w-full max-w-6xl h-170 bg-[#111827] rounded-3xl shadow-2xl flex overflow-hidden">
 
         {/* LEFT SIDE */}
         <div className="w-1/2 hidden md:block relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-teal-400" />
+          <div className="absolute inset-0 bg-linear-to-br from-blue-600 via-blue-500 to-teal-400" />
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm p-12 flex flex-col justify-between text-white">
             <div className="flex items-center gap-2 text-lg font-semibold">
               💰 <span>AI Finance Advisor</span>

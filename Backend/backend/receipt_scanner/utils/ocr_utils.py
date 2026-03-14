@@ -1,8 +1,24 @@
-import cv2
-import pytesseract
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
+try:
+    import pytesseract
+except ImportError:
+    pytesseract = None
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
 import re
-from PIL import Image
-import numpy as np
 import os
 
 # Set tesseract path if not in PATH
@@ -27,6 +43,9 @@ def preprocess_image(image_path):
     - Apply thresholding
     - Reduce noise
     """
+    if cv2 is None or np is None:
+        raise ValueError("OpenCV/Numpy dependencies are not installed on the backend server")
+
     image = cv2.imread(image_path)
     if image is None:
         raise ValueError("Unable to load image")
@@ -52,9 +71,12 @@ def extract_text(image_path):
     """
     Extract text from the preprocessed image using pytesseract.
     """
+    if pytesseract is None or Image is None:
+        raise ValueError("pytesseract/Pillow dependencies are not installed on the backend server")
+
     # Set tesseract path
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    
+
     processed_image = preprocess_image(image_path)
 
     # Convert to PIL Image for pytesseract

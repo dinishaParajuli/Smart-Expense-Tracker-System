@@ -35,7 +35,7 @@ export default function SignUp() {
         username: formData.email, // Django expects 'username'
         email: formData.email,
         password: formData.password,
-        first_name: formData.fullName, // optional
+        role: "user",
       });
 
       console.log(res.data);
@@ -44,7 +44,19 @@ export default function SignUp() {
 
     } catch (err) {
       console.error(err);
-      alert("Sign up failed! Try again.");
+      const apiError = err?.response?.data;
+      let message = "Sign up failed! Try again.";
+
+      if (typeof apiError === "string") {
+        message = apiError;
+      } else if (apiError && typeof apiError === "object") {
+        const firstError = Object.entries(apiError)
+          .map(([field, value]) => `${field}: ${Array.isArray(value) ? value[0] : value}`)
+          .find(Boolean);
+        if (firstError) message = firstError;
+      }
+
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -52,11 +64,11 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0b1120] p-6">
-      <div className="w-full max-w-6xl h-[720px] bg-[#111827] rounded-3xl shadow-2xl flex overflow-hidden">
+      <div className="w-full max-w-6xl h-180 bg-[#111827] rounded-3xl shadow-2xl flex overflow-hidden">
 
         {/* LEFT SIDE */}
         <div className="w-1/2 hidden md:block relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500" />
+          <div className="absolute inset-0 bg-linear-to-br from-purple-600 via-indigo-500 to-blue-500" />
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm p-12 flex flex-col justify-between text-white">
             <div className="text-lg font-semibold">🚀 AI Finance Advisor</div>
             <div>

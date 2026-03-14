@@ -13,6 +13,7 @@ import GoalsAndChallengesPage from "./pages/GoalsAndChallenges";
 import ReceiptScanner from "./pages/ReceiptScanner";
 import { EntryProvider } from "./Context/EntryContext";
 import BudgetEntry from "./pages/BudgetEntryPage";
+import AllEntriesPage from "./pages/AllEntriesPage";
 // … rest of App.jsx unchanged …
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/features" element={<FeaturePage />} />
         <Route path="/goals-challenges" element={<GoalsAndChallengesPage />} />
         <Route path="/budget-entry" element={<BudgetEntry />} />
+        <Route path="/all-entries" element={<AllEntriesPage />} />
         {/* <Route path="/budget-planner" element={<BudgetPlanner />} /> */}
         <Route path="/receipt-scanner" element={<ReceiptScanner />} />
       </Routes>

@@ -2,8 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import User
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from rest_framework import generics
+from django.db.models import Sum
+from .models import User, Transaction
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, TransactionSerializer
 from .permissions import IsAdminRole, IsUserRole
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -13,6 +15,78 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from .serializers import ForgotPasswordSerializer, ResetPasswordSerializer
 from django.http import JsonResponse
+
+
+def filter_transactions(queryset, params):
+    transaction_type = params.get("type")
+    start_date = params.get("start_date")
+    end_date = params.get("end_date")
+    category = params.get("category")
+
+    if transaction_type in {"income", "expense"}:
+        queryset = queryset.filter(type=transaction_type)
+    if start_date:
+        queryset = queryset.filter(date__gte=start_date)
+    if end_date:
+        queryset = queryset.filter(date__lte=end_date)
+    if category:
+        queryset = queryset.filter(category__iexact=category)
+
+    return queryset
+
+
+class TransactionListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TransactionSerializer
+
+    def get_queryset(self):
+        queryset = Transaction.objects.filter(user=self.request.user)
+        return filter_transactions(queryset, self.request.query_params)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TransactionSerializer
+
+    def get_queryset(self):
+        return Transaction.objects.filter(user=self.request.user)
+
+
+class TransactionSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        queryset = Transaction.objects.filter(user=request.user)
+        queryset = filter_transactions(queryset, request.query_params)
+
+        income_total = queryset.filter(type="income").aggregate(total=Sum("amount"))["total"] or 0
+        expense_total = queryset.filter(type="expense").aggregate(total=Sum("amount"))["total"] or 0
+        expense_breakdown_qs = (
+            queryset.filter(type="expense")
+            .values("category")
+            .annotate(value=Sum("amount"))
+            .order_by("category")
+        )
+
+        expense_breakdown = [
+            {"name": item["category"], "value": float(item["value"] or 0)}
+            for item in expense_breakdown_qs
+        ]
+
+        return Response(
+            {
+                "count": queryset.count(),
+                "total_income": float(income_total),
+                "total_expense": float(expense_total),
+                "net": float(income_total - expense_total),
+                "expense_breakdown": expense_breakdown,
+            },
+            status=status.HTTP_200_OK,
+        )
+
 #  REGISTER
 class RegisterView(APIView):
 
