@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { useEntry } from "../Context/EntryContext";
 
 const BudgetEntry = () => {
+  const navigate = useNavigate();
+  const { entries, loading, error, refreshEntries, addEntry, deleteEntry, updateEntry } = useEntry();
   const [entryType, setEntryType] = useState("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
-  const [date, setDate] = useState("2025-11-30");
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
-  const [entries, setEntries] = useState([]);
+  const [editingId, setEditingId] = useState(null);
 
   const expenseCategories = [
     "Food & Dining",
@@ -16,6 +20,7 @@ const BudgetEntry = () => {
     "Housing",
     "Entertainment",
     "Shopping",
+    "Other",
   ];
 
   const incomeCategories = ["Salary", "Other"];
@@ -30,33 +35,70 @@ const BudgetEntry = () => {
 
   const quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
+  useEffect(() => {
+    refreshEntries().catch(() => {});
+  }, [refreshEntries]);
+
   const handleTypeChange = (type) => {
     setEntryType(type);
     setCategory("");
     setPaymentMethod("Cash");
   };
 
-  const handleSaveEntry = () => {
+  const handleDeleteEntry = async (id) => {
+    try {
+      await deleteEntry(id);
+    } catch (err) {
+      alert(err.message || "Failed to delete entry.");
+    }
+  };
+
+  const handleEditEntry = (entry) => {
+    setEditingId(entry.id);
+    setEntryType(entry.type);
+    setAmount(entry.amount);
+    setCategory(entry.category);
+    setPaymentMethod(entry.paymentMethod);
+    setDate(entry.date);
+    setNotes(entry.notes);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setAmount("");
+    setCategory("");
+    setNotes("");
+    setEntryType("expense");
+    setPaymentMethod("Cash");
+    setDate(new Date().toISOString().slice(0, 10));
+  };
+
+  const handleSaveEntry = async () => {
     if (!amount || !category || !date) {
       alert("Fill required fields");
       return;
     }
 
-    const newEntry = {
-      id: Date.now(),
-      type: entryType,
-      category,
-      amount: parseFloat(amount),
-      date,
-      paymentMethod,
-      notes,
-      originalCategory: category,
-    };
+    if (entryType === "expense" && category === "Other" && !notes.trim()) {
+      alert("Please fill in the Notes field to describe this 'Other' expense.");
+      return;
+    }
 
-    setEntries([newEntry, ...entries]);
-    setAmount("");
-    setCategory("");
-    setNotes("");
+    try {
+      if (editingId !== null) {
+        await updateEntry(editingId, { type: entryType, category, amount: parseFloat(amount), date, paymentMethod, notes });
+        setEditingId(null);
+      } else {
+        await addEntry({ type: entryType, category, amount: parseFloat(amount), date, paymentMethod, notes, originalCategory: category });
+      }
+
+      setAmount("");
+      setCategory("");
+      setNotes("");
+    } catch (err) {
+      alert(err.message || "Failed to save entry.");
+    }
   };
 
   const todayEntries = entries.filter((e) => e.date === date);
@@ -88,6 +130,12 @@ const BudgetEntry = () => {
         <h1 className="text-3xl font-bold text-gray-800">Budget Entry</h1>
         <p className="text-gray-500 mb-6">Add your transactions manually</p>
 
+        {error && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            {error}
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-6">
 
           {/* LEFT SIDE */}
@@ -95,7 +143,9 @@ const BudgetEntry = () => {
 
             {/* FORM CARD */}
             <div className="bg-white p-6 rounded-xl shadow">
-              <h2 className="font-semibold text-lg mb-4">Add New Entry</h2>
+              <h2 className="font-semibold text-lg mb-4">
+                {editingId !== null ? "✏️ Edit Entry" : "Add New Entry"}
+              </h2>
 
               {/* TYPE */}
               <div className="mb-4">
@@ -200,31 +250,50 @@ const BudgetEntry = () => {
               />
 
               {/* NOTES */}
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notes"
-                className="w-full border rounded p-2 mb-4"
-              />
+              <div className="mb-4">
+                <label className="text-sm mb-1 block">
+                  Notes
+                  {entryType === "expense" && category === "Other" && (
+                    <span className="text-red-500 ml-1">* required</span>
+                  )}
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={entryType === "expense" && category === "Other" ? "Describe this expense..." : "Notes (optional)"}
+                  className={`w-full border rounded p-2 ${
+                    entryType === "expense" && category === "Other" && !notes.trim()
+                      ? "border-red-400 focus:ring-red-400"
+                      : "border-gray-300"
+                  } focus:outline-none focus:ring-2`}
+                  rows={3}
+                />
+              </div>
 
               {/* ACTIONS */}
               <div className="flex gap-3">
                 <button
                   onClick={handleSaveEntry}
+                  disabled={loading}
                   className="flex-1 bg-green-500 text-white py-2 rounded"
                 >
-                  Save
+                  {loading ? "Saving..." : editingId !== null ? "Update Entry" : "Save"}
                 </button>
-                <button
-                  onClick={() => {
-                    setAmount("");
-                    setCategory("");
-                    setNotes("");
-                  }}
-                  className="flex-1 bg-gray-500 text-white py-2 rounded"
-                >
-                  Clear
-                </button>
+                {editingId !== null ? (
+                  <button
+                    onClick={handleCancelEdit}
+                    className="flex-1 bg-gray-400 text-white py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setAmount(""); setCategory(""); setNotes(""); }}
+                    className="flex-1 bg-gray-500 text-white py-2 rounded"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
             </div>
 
@@ -268,31 +337,58 @@ const BudgetEntry = () => {
 
             {/* RECENT */}
             <div className="bg-white p-6 rounded-xl shadow">
-              <h3 className="font-semibold mb-4">Recent Entries</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">Recent Entries</h3>
+                <span className="text-xs text-gray-400">{entries.length} total</span>
+              </div>
 
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {entries.map((e) => (
-                  <div key={e.id} className="flex justify-between">
-                    <div>
-                      <p className="font-medium">{e.category}</p>
-                      <p className="text-xs text-gray-500">
-                        {formatDate(e.date)}
-                      </p>
+              <div className="space-y-3">
+                {entries.slice(0, 5).map((e) => (
+                  <div key={e.id} className="border rounded-lg p-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">{e.category}</p>
+                        <p className="text-xs text-gray-400">{formatDate(e.date)}</p>
+                        {e.notes ? (
+                          <p className="text-xs text-gray-500 mt-0.5 italic truncate max-w-35">{e.notes}</p>
+                        ) : null}
+                      </div>
+                      <span
+                        className={`font-semibold text-sm ${
+                          e.type === "income" ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {e.type === "income" ? "+" : "-"}{formatCurrency(e.amount)}
+                      </span>
                     </div>
-
-                    <span
-                      className={`font-semibold ${
-                        e.type === "income"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {e.type === "income" ? "+" : "-"}
-                      {formatCurrency(e.amount)}
-                    </span>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => handleEditEntry(e)}
+                        className="flex-1 text-xs py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEntry(e.id)}
+                        className="flex-1 text-xs py-1 rounded bg-red-50 text-red-500 hover:bg-red-100"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
+
+                {entries.length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-4">No entries yet</p>
+                )}
               </div>
+
+              <button
+                onClick={() => navigate("/all-entries")}
+                className="mt-4 w-full py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"
+              >
+                See All Entries →
+              </button>
             </div>
 
           </div>

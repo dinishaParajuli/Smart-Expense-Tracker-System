@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User
-from .models import Goal, Challenge
+from .models import User, Goal, Challenge, Transaction
 
 #  Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):
@@ -72,6 +71,13 @@ class ChallengeSerializer(serializers.ModelSerializer):
 # ForgotPasswordSection
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['id', 'type', 'amount', 'category', 'payment_method', 'date', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ResetPasswordSerializer(serializers.Serializer):
