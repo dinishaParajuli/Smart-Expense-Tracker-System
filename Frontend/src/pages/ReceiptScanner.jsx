@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
+import BackButton from "../components/BackButton";
 
 export default function ReceiptScanner() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -85,7 +86,10 @@ export default function ReceiptScanner() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-6">Receipt Scanner</h1>
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-4xl font-bold text-gray-800">Receipt Scanner</h1>
+          <BackButton />
+        </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-semibold mb-4">Upload Receipt</h2>

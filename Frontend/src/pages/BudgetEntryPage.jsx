@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useEntry } from "../Context/EntryContext";
+import BackButton from "../components/BackButton";
 
 const BudgetEntry = () => {
   const navigate = useNavigate();
@@ -126,9 +127,14 @@ const BudgetEntry = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
 
-        {/* TITLE */}
-        <h1 className="text-3xl font-bold text-gray-800">Budget Entry</h1>
-        <p className="text-gray-500 mb-6">Add your transactions manually</p>
+        {/* HEADER */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Budget Entry</h1>
+            <p className="text-gray-500">Add your transactions manually</p>
+          </div>
+          <BackButton />
+        </div>
 
         {error && (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
