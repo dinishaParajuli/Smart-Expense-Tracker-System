@@ -1,7 +1,8 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import TopBar from "../components/TopBar";
 
 const features = [
   {
@@ -37,27 +38,33 @@ const features = [
 ];
 
 export default function FeaturePage() {
+  const [userProfile, setUserProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          const response = await axios.get("http://127.0.0.1:8000/api/auth/profile/", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setUserProfile(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        // Set default profile if fetch fails
+        setUserProfile({ name: "User", tier: "Premium" });
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white">
-      
-      {/* Navbar */}
-      <div className="flex justify-between items-center px-8 py-4 bg-[#0f172a]/80 backdrop-blur-md border-b border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold">
-            AI
-          </div>
-          <h1 className="text-lg font-semibold">AI Finance Advisor</h1>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-300">John Doe</div>
-          <div className="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center">
-            JD
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
+      <TopBar profile={{ name: userProfile?.first_name ? `${userProfile.first_name} ${userProfile.last_name || ""}`.trim() : "User", tier: "Premium" }} />
       <div className="px-8 py-10">
         <h2 className="text-3xl font-bold mb-2">
           Welcome Back, John! 👋
