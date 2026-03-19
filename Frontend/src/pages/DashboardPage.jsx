@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   CartesianGrid,
   Cell,
@@ -13,9 +12,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ArrowUpRight, DollarSign, PiggyBank, ReceiptText, TrendingDown } from "lucide-react";
+import { DollarSign, PiggyBank, ReceiptText, TrendingDown } from "lucide-react";
 import TopBar from "../components/TopBar";
 import StatCard from "../components/StatCard";
+import BackButton from "../components/BackButton";
 import { fetchDashboardOverview } from "../api";
 
 const statIcons = {
@@ -56,10 +56,7 @@ function DashboardPage() {
       <TopBar profile={data?.profile} />
 
       <main className="mx-auto w-full max-w-[1600px] px-6 pb-12 pt-8 md:px-10">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-[var(--text-dim)] hover:text-white">
-          <ArrowUpRight size={14} className="rotate-180" />
-          Back to Menu
-        </Link>
+        <BackButton />
 
         {error ? <p className="mt-8 rounded-xl border border-rose-300/30 bg-rose-400/10 p-4 text-rose-200">{error}</p> : null}
         {!data ? (

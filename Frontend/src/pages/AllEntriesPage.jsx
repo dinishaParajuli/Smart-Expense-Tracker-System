@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import BackButton from "../components/BackButton";
 import {
   format,
   startOfDay,
@@ -87,12 +87,9 @@ export default function AllEntriesPage() {
       <div className="max-w-5xl mx-auto">
 
         {/* Back */}
-        <Link
-          to="/budget-entry"
-          className="inline-block mb-4 text-sm text-gray-500 hover:text-gray-800"
-        >
-          ← Back to Budget Entry
-        </Link>
+        <div className="mb-6">
+          <BackButton />
+        </div>
 
         <h1 className="text-3xl font-bold text-gray-800 mb-1">All Entries</h1>
         <p className="text-gray-500 mb-6">Full breakdown of your transactions</p>

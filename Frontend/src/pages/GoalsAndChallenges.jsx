@@ -1,12 +1,15 @@
 // src/pages/GoalsAndChallengesPage.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Target, Trophy, Plus, Edit2, Trash2, 
+  Target, Trophy, Plus, Edit2, Trash2, 
   CheckCircle 
 } from 'lucide-react';
+import BackButton from '../components/BackButton';
 
 function GoalsAndChallengesPage() {
+  const navigate = useNavigate();
   const [goals, setGoals] = useState([]);
   const [challenges, setChallenges] = useState([
     { id: 1, title: "No online food delivery this month", reward: 500, completed: false, daysLeft: 12 },
@@ -102,8 +105,14 @@ function GoalsAndChallengesPage() {
       {/* Header */}
       <header className="bg-[#1e293b] border-b border-gray-800 px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button className="p-3 hover:bg-gray-700 rounded-xl transition-colors">
-            <ArrowLeft size={28} />
+          <button 
+            onClick={() => navigate('/features')}
+            className="p-3 hover:bg-gray-700 rounded-xl transition-colors text-blue-400 hover:text-blue-300"
+            title="Back to Home"
+          >
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
           <div>
             <h1 className="text-3xl font-bold">Goals & Challenges</h1>
