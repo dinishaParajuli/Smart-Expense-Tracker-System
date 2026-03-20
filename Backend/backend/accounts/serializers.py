@@ -6,16 +6,20 @@ from .models import User, Goal, Challenge, Transaction
 #  Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'role']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'role']
 
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
             role=validated_data.get('role', 'user')
         )
         return user
@@ -50,7 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role']
 
 class GoalSerializer(serializers.ModelSerializer):
     progress = serializers.SerializerMethodField()

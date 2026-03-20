@@ -124,14 +124,14 @@ const BudgetEntry = () => {
   const formatDate = (d) => format(new Date(d), "MMM d, yyyy");
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-[#0a0f1f] p-6 text-white">
       <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Budget Entry</h1>
-            <p className="text-gray-500">Add your transactions manually</p>
+            <h1 className="text-3xl font-bold">Budget Entry</h1>
+            <p className="text-[#94a3b8]">Add your transactions manually</p>
           </div>
           <BackButton />
         </div>
@@ -148,21 +148,21 @@ const BudgetEntry = () => {
           <div className="lg:col-span-2 space-y-6">
 
             {/* FORM CARD */}
-            <div className="bg-white p-6 rounded-xl shadow">
+            <div className="rounded-xl border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
               <h2 className="font-semibold text-lg mb-4">
                 {editingId !== null ? "✏️ Edit Entry" : "Add New Entry"}
               </h2>
 
               {/* TYPE */}
               <div className="mb-4">
-                <p className="text-sm mb-2">Entry Type</p>
+                <p className="mb-2 text-sm text-[#cbd5e1]">Entry Type</p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleTypeChange("expense")}
                     className={`px-4 py-2 rounded ${
                       entryType === "expense"
                         ? "bg-red-500 text-white"
-                        : "bg-gray-200"
+                        : "bg-[#1f2937] text-[#cbd5e1]"
                     }`}
                   >
                     Expense
@@ -173,7 +173,7 @@ const BudgetEntry = () => {
                     className={`px-4 py-2 rounded ${
                       entryType === "income"
                         ? "bg-green-500 text-white"
-                        : "bg-gray-200"
+                        : "bg-[#1f2937] text-[#cbd5e1]"
                     }`}
                   >
                     Income
@@ -188,7 +188,7 @@ const BudgetEntry = () => {
                   placeholder="Amount"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full border rounded p-2"
+                  className="w-full rounded border border-white/15 bg-[#0f172a] p-2 text-white placeholder:text-[#94a3b8] focus:border-blue-500 focus:outline-none"
                 />
 
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -196,7 +196,7 @@ const BudgetEntry = () => {
                     <button
                       key={q}
                       onClick={() => setAmount(q)}
-                      className="px-3 py-1 bg-gray-100 rounded text-sm"
+                      className="rounded bg-[#1f2937] px-3 py-1 text-sm text-[#cbd5e1] hover:bg-[#334155]"
                     >
                       +{q >= 1000 ? `${q / 1000}K` : q}
                     </button>
@@ -206,7 +206,7 @@ const BudgetEntry = () => {
 
               {/* CATEGORY */}
               <div className="mb-4">
-                <p className="text-sm mb-2">Category</p>
+                <p className="mb-2 text-sm text-[#cbd5e1]">Category</p>
                 <div className="flex flex-wrap gap-2">
                   {(entryType === "expense"
                     ? expenseCategories
@@ -218,7 +218,7 @@ const BudgetEntry = () => {
                       className={`px-3 py-1 rounded text-sm ${
                         category === cat
                           ? "bg-blue-500 text-white"
-                          : "bg-gray-100"
+                            : "bg-[#1f2937] text-[#cbd5e1]"
                       }`}
                     >
                       {cat}
@@ -229,7 +229,7 @@ const BudgetEntry = () => {
 
               {/* PAYMENT */}
               <div className="mb-4">
-                <p className="text-sm mb-2">Payment Method</p>
+                <p className="mb-2 text-sm text-[#cbd5e1]">Payment Method</p>
                 <div className="flex flex-wrap gap-2">
                   {paymentMethods.map((m) => (
                     <button
@@ -238,7 +238,7 @@ const BudgetEntry = () => {
                       className={`px-3 py-1 rounded text-sm ${
                         paymentMethod === m
                           ? "bg-purple-500 text-white"
-                          : "bg-gray-100"
+                            : "bg-[#1f2937] text-[#cbd5e1]"
                       }`}
                     >
                       {m}
@@ -252,7 +252,7 @@ const BudgetEntry = () => {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full border rounded p-2 mb-4"
+                className="mb-4 w-full rounded border border-white/15 bg-[#0f172a] p-2 text-white focus:border-blue-500 focus:outline-none"
               />
 
               {/* NOTES */}
@@ -270,8 +270,8 @@ const BudgetEntry = () => {
                   className={`w-full border rounded p-2 ${
                     entryType === "expense" && category === "Other" && !notes.trim()
                       ? "border-red-400 focus:ring-red-400"
-                      : "border-gray-300"
-                  } focus:outline-none focus:ring-2`}
+                      : "border-white/15"
+                  } bg-[#0f172a] text-white placeholder:text-[#94a3b8] focus:outline-none focus:ring-2`}
                   rows={3}
                 />
               </div>
@@ -288,14 +288,14 @@ const BudgetEntry = () => {
                 {editingId !== null ? (
                   <button
                     onClick={handleCancelEdit}
-                    className="flex-1 bg-gray-400 text-white py-2 rounded"
+                    className="flex-1 rounded bg-slate-500 py-2 text-white"
                   >
                     Cancel
                   </button>
                 ) : (
                   <button
                     onClick={() => { setAmount(""); setCategory(""); setNotes(""); }}
-                    className="flex-1 bg-gray-500 text-white py-2 rounded"
+                    className="flex-1 rounded bg-slate-600 py-2 text-white"
                   >
                     Clear
                   </button>
@@ -309,9 +309,9 @@ const BudgetEntry = () => {
           <div className="space-y-6">
 
             {/* SUMMARY */}
-            <div className="bg-white p-6 rounded-xl shadow">
+            <div className="rounded-xl border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
               <h3 className="font-semibold mb-2">Today's Summary</h3>
-              <p className="text-sm text-gray-500 mb-3">{formatDate(date)}</p>
+              <p className="mb-3 text-sm text-[#94a3b8]">{formatDate(date)}</p>
 
               <div className="space-y-2">
                 <div className="flex justify-between">
@@ -342,21 +342,21 @@ const BudgetEntry = () => {
             </div>
 
             {/* RECENT */}
-            <div className="bg-white p-6 rounded-xl shadow">
+            <div className="rounded-xl border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold">Recent Entries</h3>
-                <span className="text-xs text-gray-400">{entries.length} total</span>
+                <span className="text-xs text-[#94a3b8]">{entries.length} total</span>
               </div>
 
               <div className="space-y-3">
                 {entries.slice(0, 5).map((e) => (
-                  <div key={e.id} className="border rounded-lg p-3">
+                  <div key={e.id} className="rounded-lg border border-white/10 bg-[#0f172a] p-3">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium text-sm">{e.category}</p>
-                        <p className="text-xs text-gray-400">{formatDate(e.date)}</p>
+                        <p className="text-xs text-[#94a3b8]">{formatDate(e.date)}</p>
                         {e.notes ? (
-                          <p className="text-xs text-gray-500 mt-0.5 italic truncate max-w-35">{e.notes}</p>
+                          <p className="mt-0.5 max-w-35 truncate text-xs italic text-[#94a3b8]">{e.notes}</p>
                         ) : null}
                       </div>
                       <span
@@ -370,13 +370,13 @@ const BudgetEntry = () => {
                     <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => handleEditEntry(e)}
-                        className="flex-1 text-xs py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100"
+                        className="flex-1 rounded bg-blue-500/20 py-1 text-xs text-blue-300 hover:bg-blue-500/30"
                       >
                         ✏️ Edit
                       </button>
                       <button
                         onClick={() => handleDeleteEntry(e.id)}
-                        className="flex-1 text-xs py-1 rounded bg-red-50 text-red-500 hover:bg-red-100"
+                        className="flex-1 rounded bg-red-500/20 py-1 text-xs text-red-300 hover:bg-red-500/30"
                       >
                         🗑️ Delete
                       </button>
@@ -385,13 +385,13 @@ const BudgetEntry = () => {
                 ))}
 
                 {entries.length === 0 && (
-                  <p className="text-sm text-gray-400 text-center py-4">No entries yet</p>
+                  <p className="py-4 text-center text-sm text-[#94a3b8]">No entries yet</p>
                 )}
               </div>
 
               <button
                 onClick={() => navigate("/all-entries")}
-                className="mt-4 w-full py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"
+                className="mt-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
               >
                 See All Entries →
               </button>

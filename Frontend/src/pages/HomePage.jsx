@@ -8,9 +8,11 @@ function Homepage() {
       {/* ================== NAVBAR ================== */}
       <nav className="fixed top-0 left-0 right-0 py-[18px] px-5 md:px-[60px] flex justify-between items-center bg-[rgba(255,255,255,0.05)] backdrop-blur-[12px] border-b border-[rgba(255,255,255,0.08)] z-[1000]">
         <div className="flex items-center gap-3">
-          <div className="w-[42px] h-[42px] bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] rounded-[12px] flex items-center justify-center text-[22px] font-bold">
-            $
-          </div>
+          <img
+            src="/JPG.jpg"
+            alt="AI Finance Advisor logo"
+            className="h-[42px] w-[42px] rounded-[12px] object-cover"
+          />
           <div className="flex flex-col leading-[1.2]">
             <h2 className="text-xl font-bold bg-gradient-to-r from-[#3b82f6] to-[#10b981] bg-clip-text text-transparent">
               AI Finance Advisor

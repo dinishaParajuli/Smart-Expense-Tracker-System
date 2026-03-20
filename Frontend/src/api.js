@@ -126,32 +126,16 @@ const FALLBACK_OVERVIEW = {
 };
 
 export async function fetchDashboardOverview() {
-  const errors = [];
-
-  for (const base of API_CANDIDATES) {
-    const url = `${base}/dashboard/overview/`;
-    try {
-      const response = await fetch(url);
-      const contentType = response.headers.get("content-type") || "";
-      if (response.ok) {
-        if (!contentType.includes("application/json")) {
-          errors.push(`${url} returned non-JSON content`);
-          continue;
-        }
-        const json = await response.json();
-        return { ...json, _source: "api" };
-      }
-      errors.push(`${url} returned ${response.status}`);
-    } catch (error) {
-      errors.push(`${url} unreachable`);
-    }
+  try {
+    const json = await requestApi("/auth/dashboard/overview/", {}, true);
+    return { ...json, _source: "api" };
+  } catch (error) {
+    return {
+      ...FALLBACK_OVERVIEW,
+      _source: "fallback",
+      _message: `Dashboard API failed: ${error.message}`,
+    };
   }
-
-  return {
-    ...FALLBACK_OVERVIEW,
-    _source: "fallback",
-    _message: `Dashboard API failed: ${errors.join(" | ")}`,
-  };
 }
 
 export async function fetchTransactions(params = {}) {
