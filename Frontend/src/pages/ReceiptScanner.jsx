@@ -1,9 +1,11 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import BackButton from "../components/BackButton";
+import { useEntry } from "../Context/EntryContext";
 
 export default function ReceiptScanner() {
   const [selectedImage, setSelectedImage] = useState(null);
+  const { refreshEntries } = useEntry();
 
   // Helper to format amounts in Nepali Rupees
   const formatCurrency = (amt) =>
@@ -17,6 +19,8 @@ export default function ReceiptScanner() {
   const [scanResult, setScanResult] = useState(null);
   const [error, setError] = useState(null);
   const [showRawText, setShowRawText] = useState(false);
+  const [storing, setStoring] = useState(false);
+  const [storeMessage, setStoreMessage] = useState("");
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -28,6 +32,7 @@ export default function ReceiptScanner() {
       setImagePreview(URL.createObjectURL(file));
       setScanResult(null);
       setError(null);
+      setStoreMessage("");
     }
   };
 
@@ -43,18 +48,66 @@ export default function ReceiptScanner() {
     const formData = new FormData();
     formData.append('image', selectedImage);
 
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("Please login first to scan and save receipt data.");
+      setScanning(false);
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:8000/api/receipt/receipts/scan/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
 
       setScanResult(response.data);
+      setStoreMessage("");
     } catch (err) {
       setError(err.response?.data?.error || "An error occurred during scanning.");
     } finally {
       setScanning(false);
+    }
+  };
+
+  const handleStoreScannedBill = async () => {
+    if (!scanResult?.id) {
+      setError("No scanned receipt found to store.");
+      return;
+    }
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("Please login first to store receipt data.");
+      return;
+    }
+
+    setStoring(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/receipt/receipts/${scanResult.id}/store/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setStoreMessage(response.data?.message || "Stored successfully.");
+      setScanResult((prev) => ({
+        ...prev,
+        transaction_created: response.data?.transaction_created || prev?.transaction_created,
+      }));
+      await refreshEntries().catch(() => {});
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to store scanned receipt.");
+    } finally {
+      setStoring(false);
     }
   };
 
@@ -154,6 +207,20 @@ export default function ReceiptScanner() {
         {scanResult && (
           <div className="rounded-lg border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
             <h2 className="text-2xl font-semibold mb-4">Scan Results</h2>
+
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <button
+                onClick={handleStoreScannedBill}
+                disabled={storing || Boolean(scanResult.transaction_created)}
+                className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-500"
+              >
+                {scanResult.transaction_created ? "Stored" : storing ? "Storing Data..." : "Store Data"}
+              </button>
+              {storeMessage ? <p className="text-sm text-emerald-300">{storeMessage}</p> : null}
+            </div>
+            <p className="mb-4 text-sm text-[#94a3b8]">
+              Data will be saved to the database and reflected in Dashboard only after clicking Store Data.
+            </p>
 
             <div className="mb-6">
               <h3 className="text-xl font-medium mb-2">Extracted Items</h3>

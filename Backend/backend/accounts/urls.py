@@ -11,6 +11,7 @@ from .views import (
     TransactionListCreateView,
     TransactionDetailView,
     TransactionSummaryView,
+    DashboardOverviewView,
 )
 urlpatterns = [
     #  Authentication
@@ -30,6 +31,7 @@ urlpatterns = [
     path('transactions/', TransactionListCreateView.as_view(), name='transaction-list-create'),
     path('transactions/summary/', TransactionSummaryView.as_view(), name='transaction-summary'),
     path('transactions/<int:pk>/', TransactionDetailView.as_view(), name='transaction-detail'),
+    path('dashboard/overview/', DashboardOverviewView.as_view(), name='dashboard-overview'),
 
     # Forgot Password
     path("forgot-password/", ForgotPasswordView.as_view(), name="forgot-password"),

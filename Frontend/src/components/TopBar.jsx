@@ -1,4 +1,4 @@
-import { LogOut, Sparkles, User, ChevronDown } from "lucide-react";
+import { LogOut, User, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -29,9 +29,11 @@ function TopBar({ profile }) {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0f172a]/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-3 md:px-10">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] text-white">
-            <Sparkles size={18} />
-          </div>
+          <img
+            src="/JPG.jpg"
+            alt="Smart Expense Tracker logo"
+            className="h-10 w-10 rounded-xl object-cover"
+          />
           <div>
             <p className="text-sm font-bold">Smart Expense Tracker</p>
             <p className="text-xs text-[#94a3b8]">Made for {profile?.locale || "Nepal"}</p>

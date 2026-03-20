@@ -40,6 +40,10 @@ const features = [
 export default function FeaturePage() {
   const [userProfile, setUserProfile] = useState(null);
 
+  const displayName = userProfile?.first_name?.trim()
+    ? userProfile.first_name
+    : userProfile?.username || "User";
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -67,7 +71,7 @@ export default function FeaturePage() {
       <TopBar profile={{ name: userProfile?.first_name ? `${userProfile.first_name} ${userProfile.last_name || ""}`.trim() : "User", tier: "Premium" }} />
       <div className="px-8 py-10">
         <h2 className="text-3xl font-bold mb-2">
-          Welcome Back, John! 👋
+          Welcome Back, {displayName}! 👋
         </h2>
         <p className="text-gray-400 mb-8">
           What would you like to do today?
@@ -107,19 +111,19 @@ export default function FeaturePage() {
         {/* AI Insights Section */}
         <div className="mt-12 bg-[#1e293b] rounded-2xl p-6 border border-gray-800">
           <h3 className="text-xl font-semibold mb-4">
-            AI Insights for You
+            Today's Motivation!
           </h3>
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-blue-900/30 p-4 rounded-xl">
               <p className="text-sm text-gray-300">
-                You're spending 23% more on food this month. Try meal planning to save NPR 2,000.
+                What you track, you control. What you ignore, controls you
               </p>
             </div>
 
             <div className="bg-emerald-900/30 p-4 rounded-xl">
               <p className="text-sm text-gray-300">
-                Great job! You've saved 85% towards your New Laptop goal.
+                Small expenses aren’t small—they’re the leak that sinks your money
               </p>
             </div>
 

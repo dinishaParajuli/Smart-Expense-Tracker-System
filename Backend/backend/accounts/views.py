@@ -4,6 +4,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from django.db.models import Sum
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
+from datetime import timedelta
 from .models import User, Transaction
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, TransactionSerializer
 from .permissions import IsAdminRole, IsUserRole
@@ -15,6 +18,20 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from .serializers import ForgotPasswordSerializer, ResetPasswordSerializer
 from django.http import JsonResponse
+
+
+def format_npr(value):
+    return f"NPR {float(value):,.2f}"
+
+
+def get_recent_month_labels(month_count=6):
+    now = timezone.now().date().replace(day=1)
+    months = []
+    cursor = now
+    for _ in range(month_count):
+        months.append(cursor)
+        cursor = (cursor - timedelta(days=1)).replace(day=1)
+    return list(reversed(months))
 
 
 def filter_transactions(queryset, params):
@@ -86,6 +103,105 @@ class TransactionSummaryView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class DashboardOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        queryset = Transaction.objects.filter(user=request.user)
+
+        income_total = queryset.filter(type="income").aggregate(total=Sum("amount"))["total"] or 0
+        expense_total = queryset.filter(type="expense").aggregate(total=Sum("amount"))["total"] or 0
+        balance = income_total - expense_total
+
+        expense_breakdown_qs = (
+            queryset.filter(type="expense")
+            .values("category")
+            .annotate(value=Sum("amount"))
+            .order_by("category")
+        )
+
+        palette = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#14B8A6", "#F97316", "#64748B"]
+        category_spending = []
+        for idx, item in enumerate(expense_breakdown_qs):
+            category_spending.append(
+                {
+                    "name": item["category"],
+                    "value": float(item["value"] or 0),
+                    "color": palette[idx % len(palette)],
+                }
+            )
+
+        month_points = get_recent_month_labels(6)
+        monthly_qs = (
+            queryset.annotate(month=TruncMonth("date"))
+            .values("month", "type")
+            .annotate(total=Sum("amount"))
+        )
+
+        month_map = {
+            month.strftime("%Y-%m"): {"income": 0.0, "expense": 0.0}
+            for month in month_points
+        }
+
+        for row in monthly_qs:
+            if not row["month"]:
+                continue
+            key = row["month"].strftime("%Y-%m")
+            if key in month_map:
+                month_map[key][row["type"]] = float(row["total"] or 0)
+
+        trend_labels = [month.strftime("%b") for month in month_points]
+        spending_values = [month_map[month.strftime("%Y-%m")]["expense"] for month in month_points]
+        avg_spend = (sum(spending_values) / len(spending_values)) if spending_values else 0
+        budget_values = [avg_spend for _ in spending_values]
+
+        data = {
+            "profile": {
+                "name": request.user.get_full_name() or request.user.username,
+                "tier": "Premium",
+                "locale": "Nepal",
+            },
+            "stats": [
+                {
+                    "key": "total_balance",
+                    "label": "Total Balance",
+                    "value": format_npr(balance),
+                    "delta": format_npr(balance),
+                    "deltaType": "neutral",
+                },
+                {
+                    "key": "monthly_spending",
+                    "label": "Monthly Spending",
+                    "value": format_npr(spending_values[-1] if spending_values else 0),
+                    "delta": str(queryset.filter(type="expense").count()),
+                    "deltaType": "negative",
+                },
+                {
+                    "key": "savings",
+                    "label": "Savings",
+                    "value": format_npr(income_total - expense_total),
+                    "delta": format_npr(income_total),
+                    "deltaType": "positive",
+                },
+                {
+                    "key": "transactions",
+                    "label": "Total Transactions",
+                    "value": str(queryset.count()),
+                    "delta": str(queryset.count()),
+                    "deltaType": "neutral",
+                },
+            ],
+            "categorySpending": category_spending,
+            "trend": {
+                "labels": trend_labels,
+                "spending": spending_values,
+                "budget": budget_values,
+            },
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
 
 #  REGISTER
 class RegisterView(APIView):
