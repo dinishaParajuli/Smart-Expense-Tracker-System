@@ -64,18 +64,18 @@ export default function ReceiptScanner() {
     }
 
     return (
-      <table className="min-w-full bg-white border border-gray-300">
+      <table className="min-w-full border border-white/15 bg-[#0f172a]">
         <thead>
-          <tr className="bg-gray-100">
+          <tr className="bg-[#1f2937] text-[#cbd5e1]">
             <th className="py-2 px-4 border-b text-left">Product Name</th>
             <th className="py-2 px-4 border-b text-right">Price</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="py-2 px-4 border-b">{item.name}</td>
-              <td className="py-2 px-4 border-b text-right">{formatCurrency(item.price)}</td>
+            <tr key={index} className="hover:bg-[#1e293b]">
+              <td className="border-b border-white/10 py-2 px-4">{item.name}</td>
+              <td className="border-b border-white/10 py-2 px-4 text-right">{formatCurrency(item.price)}</td>
             </tr>
           ))}
         </tbody>
@@ -83,15 +83,15 @@ export default function ReceiptScanner() {
     );
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    return (
+    <div className="min-h-screen bg-[#0a0f1f] p-6 text-white">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-4xl font-bold text-gray-800">Receipt Scanner</h1>
+          <h1 className="text-4xl font-bold">Receipt Scanner</h1>
           <BackButton />
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="mb-6 rounded-lg border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
           <h2 className="text-2xl font-semibold mb-4">Upload Receipt</h2>
 
           <div className="flex flex-wrap gap-4 mb-4">
@@ -131,7 +131,7 @@ export default function ReceiptScanner() {
               <img
                 src={imagePreview}
                 alt="Receipt preview"
-                className="max-w-full h-auto border border-gray-300 rounded"
+                className="h-auto max-w-full rounded border border-white/20"
               />
             </div>
           )}
@@ -145,14 +145,14 @@ export default function ReceiptScanner() {
           </button>
 
           {error && (
-            <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mt-4 rounded border border-red-400/50 bg-red-500/10 p-4 text-red-300">
               {error}
             </div>
           )}
         </div>
 
         {scanResult && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="rounded-lg border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
             <h2 className="text-2xl font-semibold mb-4">Scan Results</h2>
 
             <div className="mb-6">
@@ -172,14 +172,14 @@ export default function ReceiptScanner() {
             <div className="mb-4">
               <button
                 onClick={() => setShowRawText(!showRawText)}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                className="rounded bg-slate-600 px-4 py-2 text-white hover:bg-slate-500"
               >
                 {showRawText ? "Hide" : "Show"} Raw OCR Text
               </button>
             </div>
 
             {showRawText && (
-              <div className="bg-gray-100 p-4 rounded">
+              <div className="rounded bg-[#0f172a] p-4">
                 <h3 className="text-lg font-medium mb-2">Raw OCR Text</h3>
                 <pre className="whitespace-pre-wrap text-sm">{scanResult.text_extracted}</pre>
               </div>

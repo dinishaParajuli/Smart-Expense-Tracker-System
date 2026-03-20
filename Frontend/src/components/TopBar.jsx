@@ -1,4 +1,4 @@
-import { Bell, LogOut, Settings, Sparkles, Sun, User, ChevronDown } from "lucide-react";
+import { LogOut, Sparkles, User, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -26,34 +26,24 @@ function TopBar({ profile }) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--bg-nav)]/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0f172a]/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-3 md:px-10">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--brand)] text-white">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] text-white">
             <Sparkles size={18} />
           </div>
           <div>
             <p className="text-sm font-bold">Smart Expense Tracker</p>
-            <p className="text-xs text-[var(--text-dim)]">Made for {profile?.locale || "Nepal"}</p>
+            <p className="text-xs text-[#94a3b8]">Made for {profile?.locale || "Nepal"}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="rounded-full border border-[var(--line)] bg-white/5 p-2 text-[var(--text-dim)]">
-            <Sun size={16} />
-          </button>
-          <button className="rounded-full border border-[var(--line)] bg-white/5 p-2 text-[var(--text-dim)]">
-            <Bell size={16} />
-          </button>
-          <button className="rounded-full border border-[var(--line)] bg-white/5 p-2 text-[var(--text-dim)]">
-            <Settings size={16} />
-          </button>
-
           {/* Profile Dropdown */}
           <div className="relative ml-2">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/5 px-3 py-1.5 hover:bg-white/10 transition-colors"
+              className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 hover:bg-white/10 transition-colors"
             >
               <span className="text-sm text-white font-medium">{profile?.name || "Regan Karki"}</span>
               <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-slate-900 font-bold text-sm">
@@ -61,7 +51,7 @@ function TopBar({ profile }) {
               </div>
               <ChevronDown 
                 size={16} 
-                className={`text-[var(--text-dim)] transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} 
+                className={`text-[#94a3b8] transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} 
               />
             </button>
 

@@ -52,7 +52,7 @@ function DashboardPage() {
   }, [data]);
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#0a0f1f] text-white">
       <TopBar profile={data?.profile} />
 
       <main className="mx-auto w-full max-w-[1600px] px-6 pb-12 pt-8 md:px-10">
@@ -60,7 +60,7 @@ function DashboardPage() {
 
         {error ? <p className="mt-8 rounded-xl border border-rose-300/30 bg-rose-400/10 p-4 text-rose-200">{error}</p> : null}
         {!data ? (
-          <p className="mt-8 text-[var(--text-dim)]">Loading dashboard...</p>
+          <p className="mt-8 text-[#94a3b8]">Loading dashboard...</p>
         ) : (
           <>
             <section className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -70,7 +70,7 @@ function DashboardPage() {
             </section>
 
             <section className="mt-6 grid gap-5 xl:grid-cols-2">
-              <article className="card-glow rounded-3xl p-6">
+              <article className="rounded-3xl border border-white/10 bg-[#111828] p-6 shadow-[0_20px_45px_-28px_rgba(2,6,23,0.9)]">
                 <h2 className="text-3xl">Spending by Category</h2>
                 <div className="mt-6 h-[430px]">
                   <ResponsiveContainer>
@@ -90,12 +90,13 @@ function DashboardPage() {
                           <Cell key={entry.name} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Legend verticalAlign="bottom" iconType="rect" />
+                      <Legend verticalAlign="bottom" iconType="rect" wrapperStyle={{ color: "#cbd5e1" }} />
                       <Tooltip
                         contentStyle={{
                           borderRadius: "14px",
-                          border: "1px solid rgba(171, 187, 226, 0.3)",
-                          background: "#171f34",
+                          border: "1px solid rgba(148, 163, 184, 0.35)",
+                          background: "#111827",
+                          color: "#e2e8f0",
                         }}
                       />
                     </PieChart>
@@ -103,15 +104,15 @@ function DashboardPage() {
                 </div>
               </article>
 
-              <article className="card-glow rounded-3xl p-6">
+              <article className="rounded-3xl border border-white/10 bg-[#111828] p-6 shadow-[0_20px_45px_-28px_rgba(2,6,23,0.9)]">
                 <h2 className="text-3xl">Spending vs Budget Trend</h2>
                 <div className="mt-10 h-[430px]">
                   <ResponsiveContainer>
                     <LineChart data={trendData}>
-                      <CartesianGrid stroke="rgba(171, 187, 226, 0.12)" vertical={false} />
-                      <XAxis dataKey="month" stroke="#91a1c6" tickLine={false} axisLine={false} />
+                      <CartesianGrid stroke="rgba(148, 163, 184, 0.12)" vertical={false} />
+                      <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
                       <YAxis
-                        stroke="#91a1c6"
+                        stroke="#94a3b8"
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(value) => value.toLocaleString()}
@@ -120,11 +121,12 @@ function DashboardPage() {
                         formatter={(value) => `NPR ${Number(value).toLocaleString()}`}
                         contentStyle={{
                           borderRadius: "14px",
-                          border: "1px solid rgba(171, 187, 226, 0.3)",
-                          background: "#171f34",
+                          border: "1px solid rgba(148, 163, 184, 0.35)",
+                          background: "#111827",
+                          color: "#e2e8f0",
                         }}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ color: "#cbd5e1" }} />
                       <Line
                         type="monotone"
                         dataKey="spending"

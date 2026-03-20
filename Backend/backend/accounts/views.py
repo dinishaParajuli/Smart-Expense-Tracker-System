@@ -128,6 +128,14 @@ class UserDashboardView(APIView):
         return Response({"message": "Welcome User"})
 
 
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 #  ADMIN USER CRUD
 class UserManagementView(APIView):
     permission_classes = [IsAuthenticated, IsAdminRole]

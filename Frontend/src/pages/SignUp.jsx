@@ -30,9 +30,15 @@ export default function SignUp() {
     setLoading(true);
 
     try {
+      const fullName = formData.fullName.trim();
+      const [firstName, ...rest] = fullName.split(/\s+/);
+      const lastName = rest.join(" ");
+
       // Call Django register API
       const res = await axios.post("http://127.0.0.1:8000/api/auth/register/", {
         username: formData.email, // Django expects 'username'
+        first_name: firstName || "",
+        last_name: lastName || "",
         email: formData.email,
         password: formData.password,
         role: "user",
