@@ -7,8 +7,8 @@ from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
-from .models import User, Transaction
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, TransactionSerializer
+from .models import User, Transaction, Budget
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, TransactionSerializer, BudgetSerializer
 from .permissions import IsAdminRole, IsUserRole
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -365,6 +365,26 @@ class ResetPasswordView(APIView):
         user.save(update_fields=["password"])
 
         return Response({"detail": "Password reset successful."}, status=status.HTTP_200_OK)
+
+
+# Budget Views
+class BudgetListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BudgetSerializer
+
+    def get_queryset(self):
+        return Budget.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class BudgetDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BudgetSerializer
+
+    def get_queryset(self):
+        return Budget.objects.filter(user=self.request.user)
 
 
 #dashboard view

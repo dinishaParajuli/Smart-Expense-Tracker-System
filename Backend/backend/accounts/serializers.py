@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Goal, Challenge, Transaction
+from .models import User, Goal, Challenge, Transaction, Budget
 
 #  Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):
@@ -88,3 +88,16 @@ class ResetPasswordSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()
     new_password = serializers.CharField(min_length=8, write_only=True)
+
+
+class BudgetSerializer(serializers.ModelSerializer):
+    spent = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Budget
+        fields = ['id', 'name', 'category', 'amount', 'period', 'spent', 'color', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'spent', 'created_at', 'updated_at']
+
+    def get_spent(self, obj):
+        """Get the actual spent amount from transactions"""
+        return obj.get_spent_amount()

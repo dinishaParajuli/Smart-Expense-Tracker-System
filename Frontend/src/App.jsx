@@ -10,7 +10,7 @@ import DashboardPage from "./pages/DashboardPage";
 import FeaturePage from "./pages/FeaturePage";
 import GoalsAndChallengesPage from "./pages/GoalsAndChallenges";
 import ProfilePage from "./pages/ProfilePage";
-// import BudgetPlanner from "./pages/BudgetPlanner";
+import BudgetPlanner from "./pages/BudgetPlanner";
 import ReceiptScanner from "./pages/ReceiptScanner";
 import { EntryProvider } from "./Context/EntryContext";
 import BudgetEntry from "./pages/BudgetEntryPage";
@@ -32,7 +32,7 @@ function App() {
         <Route path="/goals-challenges" element={<GoalsAndChallengesPage />} />
         <Route path="/budget-entry" element={<BudgetEntry />} />
         <Route path="/all-entries" element={<AllEntriesPage />} />
-        {/* <Route path="/budget-planner" element={<BudgetPlanner />} /> */}
+        <Route path="/budget-planner" element={<BudgetPlanner />} />
         <Route path="/receipt-scanner" element={<ReceiptScanner />} />
       </Routes>
     </EntryProvider>

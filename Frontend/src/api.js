@@ -177,3 +177,40 @@ export async function deleteTransaction(id) {
 export async function fetchTransactionSummary(params = {}) {
   return requestApi(`/auth/transactions/summary/${buildQueryString(params)}`, {}, true);
 }
+
+// Budget APIs
+export async function fetchBudgets() {
+  return requestApi("/auth/budgets/", {}, true);
+}
+
+export async function createBudget(payload) {
+  return requestApi(
+    "/auth/budgets/",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
+}
+
+export async function updateBudget(id, payload) {
+  return requestApi(
+    `/auth/budgets/${id}/`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
+}
+
+export async function deleteBudget(id) {
+  return requestApi(
+    `/auth/budgets/${id}/`,
+    {
+      method: "DELETE",
+    },
+    true,
+  );
+}

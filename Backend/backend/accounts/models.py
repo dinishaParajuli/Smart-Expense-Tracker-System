@@ -64,3 +64,51 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.type} - {self.amount}"
+
+
+class Budget(models.Model):
+    PERIOD_CHOICES = (
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+        ('yearly', 'Yearly'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budgets')
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    period = models.CharField(max_length=10, choices=PERIOD_CHOICES, default='monthly')
+    spent = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    color = models.CharField(max_length=50, default='bg-blue-500')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('user', 'category', 'period')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.category} ({self.period})"
+
+    def get_spent_amount(self):
+        """Calculate spent amount from transactions"""
+        from django.utils import timezone
+        from datetime import timedelta
+
+        today = timezone.now().date()
+        
+        if self.period == 'weekly':
+            start_date = today - timedelta(days=today.weekday())
+        elif self.period == 'monthly':
+            start_date = today.replace(day=1)
+        else:  # yearly
+            start_date = today.replace(month=1, day=1)
+        
+        spent = Transaction.objects.filter(
+            user=self.user,
+            category=self.category,
+            type='expense',
+            date__gte=start_date
+        ).aggregate(total=models.Sum('amount'))['total'] or 0
+        
+        return float(spent)
