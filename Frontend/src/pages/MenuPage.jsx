@@ -1,7 +1,8 @@
-import { Calculator, Camera, Grid2x2, PlusCircle, Target } from "lucide-react";
+import { Calculator, Camera, Grid2x2, PlusCircle, Target, Shield, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import MenuCard from "../components/MenuCard";
+import { isAdminFromStorage } from "../utils/auth";
 
 const cards = [
   {
@@ -51,8 +52,35 @@ const cards = [
   },
 ];
 
+const adminCards = [
+  {
+    id: "admin-dashboard",
+    badge: "Admin",
+    title: "Admin Dashboard",
+    description: "Monitor users, view statistics, and manage the system",
+    icon: <Shield size={20} />,
+    colorClass: "bg-red-600",
+    route: "/admin/dashboard",
+  },
+  {
+    id: "user-management",
+    badge: "Admin",
+    title: "User Management",
+    description: "Manage user accounts, roles, and permissions",
+    icon: <Users size={20} />,
+    colorClass: "bg-purple-600",
+    route: "/admin/users",
+  },
+];
+
 function MenuPage() {
   const navigate = useNavigate();
+
+  // Check if user is admin
+  const isAdmin = isAdminFromStorage();
+
+  // Combine regular cards with admin cards if user is admin
+  const allCards = isAdmin ? [...cards, ...adminCards] : cards;
 
   return (
     <div>
@@ -67,7 +95,7 @@ function MenuPage() {
         </section>
 
         <section className="mt-12 grid gap-6 md:grid-cols-2 xl:mx-auto xl:max-w-4xl">
-          {cards.map((card, index) => (
+          {allCards.map((card, index) => (
             <div key={card.id} className={index === 4 ? "md:col-span-2 md:mx-auto md:w-[62%]" : ""}>
               <MenuCard {...card} onEnter={card.route ? () => navigate(card.route) : undefined} />
             </div>

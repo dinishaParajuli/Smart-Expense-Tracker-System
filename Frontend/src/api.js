@@ -1,5 +1,7 @@
 const API_CANDIDATES = ["/api", "http://127.0.0.1:8000/api"];
 
+export const API_BASE_URL = "http://127.0.0.1:8000";
+
 function getAccessToken() {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem("access_token");

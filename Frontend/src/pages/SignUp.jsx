@@ -7,7 +7,7 @@ export default function SignUp() {
     fullName: "",
     email: "",
     password: "",
-    confirmPassword: "",
+    role: "user",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -21,11 +21,6 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
 
     setLoading(true);
 
@@ -41,7 +36,7 @@ export default function SignUp() {
         last_name: lastName || "",
         email: formData.email,
         password: formData.password,
-        role: "user",
+        role: formData.role || "user",
       });
 
       console.log(res.data);
@@ -147,16 +142,17 @@ export default function SignUp() {
             </div>
 
             <div>
-              <label className="text-gray-400 text-sm block mb-2">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
+              <label className="text-gray-400 text-sm block mb-2">Role</label>
+              <select
+                name="role"
+                value={formData.role}
                 onChange={handleChange}
-                placeholder="Confirm your password"
                 className="w-full px-4 py-3 rounded-xl bg-[#1e293b] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 required
-              />
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
 
             <button

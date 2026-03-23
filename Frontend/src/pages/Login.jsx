@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getDashboardRouteByRole, saveLoginSession } from "../utils/auth";
 
 export default function Login() {
   const [email, setEmail] = useState(""); // email/username
@@ -19,12 +20,11 @@ export default function Login() {
         password: password,
       });
 
-      // Save JWT access token in localStorage
-      localStorage.setItem("access_token", res.data.access);
-      localStorage.setItem("refresh_token", res.data.refresh);
+      // Persist auth session using normalized role/is_staff values.
+      saveLoginSession(res.data);
 
       alert("Login successful!");
-      navigate("/features"); // Navigate to dashboard (update as needed)
+      navigate(getDashboardRouteByRole(res.data?.role), { replace: true });
 
     } catch (err) {
       console.error(err);

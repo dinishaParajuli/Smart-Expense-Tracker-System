@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CartesianGrid,
   Cell,
@@ -17,6 +18,7 @@ import TopBar from "../components/TopBar";
 import StatCard from "../components/StatCard";
 import BackButton from "../components/BackButton";
 import { fetchDashboardOverview } from "../api";
+import { isAdminFromStorage } from "../utils/auth";
 
 const statIcons = {
   total_balance: <DollarSign size={16} />,
@@ -26,10 +28,23 @@ const statIcons = {
 };
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (isAdminFromStorage()) {
+      navigate("/admin/dashboard");
+      return;
+    }
+
     fetchDashboardOverview()
       .then((payload) => {
         setData(payload);

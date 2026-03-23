@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
@@ -233,7 +233,86 @@ class AdminDashboardView(APIView):
     permission_classes = [IsAuthenticated, IsAdminRole]
 
     def get(self, request):
-        return Response({"message": "Welcome Admin"})
+        # User statistics
+        total_users = User.objects.filter(role='user').count()
+        total_admins = User.objects.filter(role='admin').count()
+        active_users = User.objects.filter(is_active=True).count()
+        inactive_users = User.objects.filter(is_active=False).count()
+
+        # Recent users (last 30 days)
+        from django.utils import timezone
+        thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
+        recent_users = User.objects.filter(date_joined__gte=thirty_days_ago).count()
+
+        # Transaction statistics
+        total_transactions = Transaction.objects.count()
+        total_income = Transaction.objects.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
+        total_expense = Transaction.objects.filter(type='expense').aggregate(total=Sum('amount'))['total'] or 0
+
+        # Monthly user registrations
+        monthly_registrations = []
+        for i in range(6):
+            month_start = timezone.now().replace(day=1) - timezone.timedelta(days=i*30)
+            month_end = month_start.replace(day=28) + timezone.timedelta(days=4)  # Handle month end
+            month_end = month_end - timezone.timedelta(days=month_end.day)
+            
+            count = User.objects.filter(
+                date_joined__gte=month_start,
+                date_joined__lte=month_end
+            ).count()
+            monthly_registrations.append({
+                'month': month_start.strftime('%b %Y'),
+                'count': count
+            })
+
+        monthly_registrations.reverse()
+
+        # Top spending users
+        top_spenders = []
+        users_with_spending = User.objects.filter(role='user').annotate(
+            total_spent=Sum('transactions__amount', filter=Q(transactions__type='expense'))
+        ).filter(total_spent__gt=0).order_by('-total_spent')[:5]
+
+        for user in users_with_spending:
+            top_spenders.append({
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'total_spent': float(user.total_spent or 0),
+                'transaction_count': user.transactions.filter(type='expense').count()
+            })
+
+        # Recent transactions
+        recent_transactions = []
+        recent_txns = Transaction.objects.select_related('user').order_by('-created_at')[:10]
+        for txn in recent_txns:
+            recent_transactions.append({
+                'id': txn.id,
+                'user': txn.user.username,
+                'type': txn.type,
+                'amount': float(txn.amount),
+                'category': txn.category,
+                'date': txn.date.isoformat()
+            })
+
+        return Response({
+            'stats': {
+                'total_users': total_users,
+                'total_admins': total_admins,
+                'active_users': active_users,
+                'inactive_users': inactive_users,
+                'recent_users': recent_users,
+                'total_transactions': total_transactions,
+                'total_income': float(total_income),
+                'total_expense': float(total_expense),
+                'net_amount': float(total_income - total_expense)
+            },
+            'charts': {
+                'monthly_registrations': monthly_registrations
+            },
+            'top_spenders': top_spenders,
+            'recent_transactions': recent_transactions
+        })
 
 
 #  USER DASHBOARD
@@ -255,6 +334,16 @@ class ProfileView(APIView):
 #  ADMIN USER CRUD
 class UserManagementView(APIView):
     permission_classes = [IsAuthenticated, IsAdminRole]
+
+    #  CREATE user
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(UserSerializer(user).data, status=201)
+
+        return Response(serializer.errors, status=400)
 
     #  GET all users or single user
     def get(self, request, pk=None):
@@ -286,8 +375,8 @@ class UserManagementView(APIView):
         serializer = UserSerializer(user, data=request.data, partial=True)
 
         if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "User updated successfully"})
+            updated_user = serializer.save()
+            return Response(UserSerializer(updated_user).data)
 
         return Response(serializer.errors, status=400)
 

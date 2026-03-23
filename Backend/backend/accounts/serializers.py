@@ -8,6 +8,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
+    role = serializers.ChoiceField(choices=User.ROLE_CHOICES, default='user', required=False)
 
     class Meta:
         model = User
@@ -45,7 +46,8 @@ class LoginSerializer(serializers.Serializer):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'username': user.username,
-            'role': user.role
+            'role': user.role,
+            'is_staff': user.is_staff
         }
 
 
@@ -54,7 +56,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role']
+        fields = [
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'role',
+            'is_active',
+            'date_joined',
+            'last_login',
+        ]
 
 class GoalSerializer(serializers.ModelSerializer):
     progress = serializers.SerializerMethodField()

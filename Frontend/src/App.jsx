@@ -15,6 +15,10 @@ import ReceiptScanner from "./pages/ReceiptScanner";
 import { EntryProvider } from "./Context/EntryContext";
 import BudgetEntry from "./pages/BudgetEntryPage";
 import AllEntriesPage from "./pages/AllEntriesPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import UserManagement from "./pages/UserManagement";
+import ExpenseMonitor from "./pages/ExpenseMonitor";
+import AdminControlCenter from "./pages/AdminControlCenter";
 // … rest of App.jsx unchanged …
 
 function App() {
@@ -34,6 +38,10 @@ function App() {
         <Route path="/all-entries" element={<AllEntriesPage />} />
         <Route path="/budget-planner" element={<BudgetPlanner />} />
         <Route path="/receipt-scanner" element={<ReceiptScanner />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<UserManagement />} />
+        <Route path="/admin/expense-monitor" element={<ExpenseMonitor />} />
+        <Route path="/admin/finance-lab" element={<AdminControlCenter />} />
       </Routes>
     </EntryProvider>
   );
