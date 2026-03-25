@@ -7,8 +7,8 @@ from django.db.models import Sum, Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
-from .models import User, Transaction, Budget
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, TransactionSerializer, BudgetSerializer
+from .models import User, Goal, Challenge, Transaction, Budget
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, GoalSerializer, ChallengeSerializer, TransactionSerializer, BudgetSerializer
 from .permissions import IsAdminRole, IsUserRole
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -50,6 +50,79 @@ def filter_transactions(queryset, params):
         queryset = queryset.filter(category__iexact=category)
 
     return queryset
+
+
+def ensure_default_challenges(user):
+    if Challenge.objects.filter(user=user).exists():
+        return
+
+    defaults = [
+        {
+            "title": "No online food delivery this month",
+            "description": "Avoid food delivery purchases for the month.",
+            "progress": 0,
+            "total": 100,
+            "reward_points": 500,
+            "days_left": 12,
+        },
+        {
+            "title": "Save NPR 5,000 every week",
+            "description": "Track weekly savings target and stay consistent.",
+            "progress": 100,
+            "total": 100,
+            "reward_points": 300,
+            "days_left": 0,
+        },
+        {
+            "title": "30-day no shopping challenge",
+            "description": "Avoid non-essential shopping for 30 days.",
+            "progress": 0,
+            "total": 100,
+            "reward_points": 800,
+            "days_left": 8,
+        },
+    ]
+
+    Challenge.objects.bulk_create([Challenge(user=user, **item) for item in defaults])
+
+
+class GoalListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = GoalSerializer
+
+    def get_queryset(self):
+        return Goal.objects.filter(user=self.request.user).order_by("-id")
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class GoalDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = GoalSerializer
+
+    def get_queryset(self):
+        return Goal.objects.filter(user=self.request.user)
+
+
+class ChallengeListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ChallengeSerializer
+
+    def get_queryset(self):
+        ensure_default_challenges(self.request.user)
+        return Challenge.objects.filter(user=self.request.user).order_by("-id")
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class ChallengeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ChallengeSerializer
+
+    def get_queryset(self):
+        return Challenge.objects.filter(user=self.request.user)
 
 
 class TransactionListCreateView(generics.ListCreateAPIView):

@@ -1,4 +1,5 @@
 from django.urls import path, include
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     RegisterView,
     LoginView,
@@ -8,6 +9,10 @@ from .views import (
     UserManagementView,
     ForgotPasswordView, 
     ResetPasswordView,
+    GoalListCreateView,
+    GoalDetailView,
+    ChallengeListCreateView,
+    ChallengeDetailView,
     TransactionListCreateView,
     TransactionDetailView,
     TransactionSummaryView,
@@ -19,6 +24,7 @@ urlpatterns = [
     #  Authentication
     path('register/', RegisterView.as_view()),
     path('login/', LoginView.as_view()),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     #  Dashboards
     path('admin-dashboard/', AdminDashboardView.as_view()),
@@ -28,6 +34,12 @@ urlpatterns = [
     #  User Management (CRUD)
     path('users/', UserManagementView.as_view()),
     path('users/<int:pk>/', UserManagementView.as_view()),
+
+    # Goals & Challenges (CRUD)
+    path('goals/', GoalListCreateView.as_view(), name='goal-list-create'),
+    path('goals/<int:pk>/', GoalDetailView.as_view(), name='goal-detail'),
+    path('challenges/', ChallengeListCreateView.as_view(), name='challenge-list-create'),
+    path('challenges/<int:pk>/', ChallengeDetailView.as_view(), name='challenge-detail'),
 
     # Transactions (income/expense CRUD)
     path('transactions/', TransactionListCreateView.as_view(), name='transaction-list-create'),

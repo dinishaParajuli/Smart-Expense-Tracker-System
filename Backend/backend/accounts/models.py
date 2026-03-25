@@ -20,6 +20,8 @@ class Goal(models.Model):
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     saved_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     deadline = models.DateField()
+    category = models.CharField(max_length=100, default='Savings')
+    notes = models.TextField(blank=True, default='')
 
     def progress(self):
         return (self.saved_amount / self.target_amount) * 100

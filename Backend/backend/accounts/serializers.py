@@ -69,20 +69,31 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
 class GoalSerializer(serializers.ModelSerializer):
+    target = serializers.DecimalField(source='target_amount', max_digits=10, decimal_places=2)
+    current = serializers.DecimalField(source='saved_amount', max_digits=10, decimal_places=2, required=False)
     progress = serializers.SerializerMethodField()
 
     class Meta:
         model = Goal
-        fields = '__all__'
+        fields = ['id', 'title', 'target', 'current', 'deadline', 'category', 'notes', 'progress']
 
     def get_progress(self, obj):
-        return obj.progress()
+        if not obj.target_amount:
+            return 0
+        return float((obj.saved_amount / obj.target_amount) * 100)
 
 
 class ChallengeSerializer(serializers.ModelSerializer):
+    reward = serializers.IntegerField(source='reward_points', required=False)
+    daysLeft = serializers.IntegerField(source='days_left', required=False)
+    completed = serializers.SerializerMethodField()
+
     class Meta:
         model = Challenge
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'progress', 'total', 'reward', 'daysLeft', 'completed']
+
+    def get_completed(self, obj):
+        return obj.progress >= obj.total
 
 # ForgotPasswordSection
 class ForgotPasswordSerializer(serializers.Serializer):
