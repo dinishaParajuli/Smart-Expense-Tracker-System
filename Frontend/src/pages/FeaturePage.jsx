@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import TopBar from "../components/TopBar";
 
@@ -71,7 +71,7 @@ export default function FeaturePage() {
       <TopBar profile={{ name: userProfile?.first_name ? `${userProfile.first_name} ${userProfile.last_name || ""}`.trim() : "User", tier: "Premium" }} />
       <div className="px-8 py-10">
         <h2 className="text-3xl font-bold mb-2">
-          Welcome Back, {displayName}! 👋
+          Welcome Back, {displayName}
         </h2>
         <p className="text-gray-400 mb-8">
           What would you like to do today?
@@ -87,7 +87,7 @@ export default function FeaturePage() {
               <div
                 className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center text-lg font-bold`}
               >
-                $
+                {feature.title.charAt(0)}
               </div>
 
               <h3 className="mt-4 text-lg font-semibold">
