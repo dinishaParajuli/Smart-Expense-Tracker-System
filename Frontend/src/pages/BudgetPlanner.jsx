@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
 import { fetchBudgets, createBudget, deleteBudget } from "../api";
+import { normalizeNepaliInput, parseNepaliNumber } from "../utils/nepaliNumberConverter";
 
 const cls = (...values) => values.filter(Boolean).join(" ");
 
@@ -94,17 +95,18 @@ const BudgetPlanner = () => {
         return;
       }
 
-      if (parseFloat(newBudgetForm.amount) < 0) {
+      if (parseNepaliNumber(newBudgetForm.amount) < 0) {
         setError("Budget amount cannot be negative");
         return;
       }
 
       setLoading(true);
       try {
+        const normalizedAmount = parseNepaliNumber(newBudgetForm.amount);
         const newBudget = await createBudget({
           name: newBudgetForm.name || newBudgetForm.category,
           category: newBudgetForm.category,
-          amount: parseFloat(newBudgetForm.amount),
+          amount: normalizedAmount,
           period: newBudgetForm.period,
           color: newBudgetForm.color,
         });
@@ -194,19 +196,25 @@ const BudgetPlanner = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "amount" && value !== "" && Number(value) < 0) {
-      setError("Budget amount cannot be negative");
-      return;
+    if (name === "amount") {
+      const normalizedValue = normalizeNepaliInput(value);
+      if (normalizedValue !== "" && Number(normalizedValue) < 0) {
+        setError("Budget amount cannot be negative");
+        return;
+      }
+      if (error) {
+        setError("");
+      }
+      setNewBudgetForm({
+        ...newBudgetForm,
+        [name]: value,
+      });
+    } else {
+      setNewBudgetForm({
+        ...newBudgetForm,
+        [name]: value,
+      });
     }
-
-    if (name === "amount" && error) {
-      setError("");
-    }
-
-    setNewBudgetForm({
-      ...newBudgetForm,
-      [name]: value,
-    });
   };
 
   const inputClass =
@@ -316,10 +324,9 @@ const BudgetPlanner = () => {
                     </label>
                     <input
                       id="budget-amount"
-                      type="number"
-                      min="0"
+                      type="text"
                       name="amount"
-                      placeholder="Amount"
+                      placeholder="Amount (e.g., 5000 or \u0969\u0966\u0966\u0966)"
                       value={newBudgetForm.amount}
                       onChange={handleInputChange}
                       className={inputClass}
