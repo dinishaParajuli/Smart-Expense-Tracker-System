@@ -1,10 +1,76 @@
-const API_CANDIDATES = ["/api", "http://127.0.0.1:8000/api"];
+const API_CANDIDATES = (() => {
+  const envBase = (import.meta.env.VITE_API_BASE_URL || "").trim();
+  if (envBase) {
+    return [envBase.replace(/\/$/, "")];
+  }
+  return ["http://127.0.0.1:8000/api"];
+})();
 
 export const API_BASE_URL = "http://127.0.0.1:8000";
 
 function getAccessToken() {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem("access_token");
+}
+
+function getRefreshToken() {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem("refresh_token");
+}
+
+function clearSession() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem("access_token");
+  window.localStorage.removeItem("refresh_token");
+  window.localStorage.removeItem("username");
+  window.localStorage.removeItem("role");
+  window.localStorage.removeItem("is_staff");
+}
+
+let refreshInFlight = null;
+
+async function refreshAccessToken() {
+  const refresh = getRefreshToken();
+  if (!refresh) return null;
+
+  if (refreshInFlight) {
+    return refreshInFlight;
+  }
+
+  refreshInFlight = (async () => {
+    for (const base of API_CANDIDATES) {
+      const url = `${base}/auth/token/refresh/`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh }),
+        });
+
+        const contentType = response.headers.get("content-type") || "";
+
+        if (!response.ok || !contentType.includes("application/json")) {
+          continue;
+        }
+
+        const data = await response.json();
+        const nextAccess = data?.access;
+        if (nextAccess) {
+          window.localStorage.setItem("access_token", nextAccess);
+          return nextAccess;
+        }
+      } catch (_error) {
+        // Try next candidate.
+      }
+    }
+
+    return null;
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+
+  return refreshInFlight;
 }
 
 function buildQueryString(params = {}) {
@@ -22,7 +88,7 @@ function buildQueryString(params = {}) {
 
 async function requestApi(path, options = {}, requireAuth = false) {
   const errors = [];
-  const token = getAccessToken();
+  let token = getAccessToken();
 
   if (requireAuth && !token) {
     throw new Error("Please log in to manage transactions.");
@@ -42,6 +108,36 @@ async function requestApi(path, options = {}, requireAuth = false) {
       });
 
       const contentType = response.headers.get("content-type") || "";
+
+      if (requireAuth && response.status === 401) {
+        const refreshedToken = await refreshAccessToken();
+        if (refreshedToken) {
+          token = refreshedToken;
+
+          const retryResponse = await fetch(url, {
+            ...options,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              ...(options.headers || {}),
+            },
+          });
+
+          const retryType = retryResponse.headers.get("content-type") || "";
+          if (retryResponse.ok) {
+            if (retryResponse.status === 204) return null;
+            if (!retryType.includes("application/json")) {
+              const text = await retryResponse.text();
+              errors.push(`${url} returned non-JSON content: ${text.slice(0, 120)}`);
+              continue;
+            }
+            return retryResponse.json();
+          }
+        }
+
+        clearSession();
+        throw new Error("Session expired. Please log in again.");
+      }
 
       if (response.ok) {
         if (response.status === 204) return null;
@@ -68,9 +164,20 @@ async function requestApi(path, options = {}, requireAuth = false) {
       }
 
       errors.push(`${url} returned ${detail}`);
-    } catch (error) {
+    } catch (_error) {
       errors.push(`${url} unreachable`);
     }
+  }
+
+  const hasUnreachableError = errors.some((message) => message.includes("unreachable"));
+  const hasHtmlFallbackError = errors.some((message) => message.includes("non-JSON content"));
+
+  if (hasUnreachableError) {
+    throw new Error("Backend API is unreachable. Start Django server at http://127.0.0.1:8000.");
+  }
+
+  if (hasHtmlFallbackError) {
+    throw new Error("API route returned HTML instead of JSON. Verify VITE_API_BASE_URL or Vite proxy configuration.");
   }
 
   throw new Error(errors.join(" | ") || "API request failed");

@@ -156,6 +156,13 @@ const UserManagement = () => {
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
 
+    if (!selectedUser.id) {
+      setError("Invalid user selected for deletion");
+      return;
+    }
+
+    setError("");
+
     try {
       const token = localStorage.getItem("access_token");
       const response = await fetch(`${API_BASE_URL}/api/auth/users/${selectedUser.id}/`, {
@@ -166,7 +173,7 @@ const UserManagement = () => {
       });
 
       if (response.ok) {
-        setUsers((prev) => prev.filter((user) => user.id !== selectedUser.id));
+        await fetchUsers();
         closeModal();
       } else {
         setError("Failed to delete user");
@@ -274,8 +281,6 @@ const UserManagement = () => {
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#0b1120] text-white">
-      <div className="pointer-events-none absolute left-[-120px] top-[-120px] h-[280px] w-[280px] rounded-full bg-cyan-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-[-120px] right-[-120px] h-[300px] w-[300px] rounded-full bg-blue-500/10 blur-3xl" />
       <div className="flex min-h-screen">
         <AdminSidebar
           currentRoute="/admin/users"
@@ -323,7 +328,7 @@ const UserManagement = () => {
                   setSelectedUser(null);
                   setShowModal(true);
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_-16px_rgba(34,211,238,0.9)] transition hover:brightness-110"
+                className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-500"
               >
                 <UserPlus size={14} />
                 Add New User
@@ -331,7 +336,7 @@ const UserManagement = () => {
             </div>
 
             <div className="mb-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
-              <section className="rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-[#111827] p-5 shadow-[0_20px_40px_-30px_rgba(8,47,73,0.9)]">
+              <section className="rounded-2xl border border-slate-700 bg-[#111827] p-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Directory</p>
                 <div className="mt-2 flex items-end gap-2">
                   <h2 className="text-4xl font-semibold text-white">{activeUsers.toLocaleString()}</h2>
@@ -341,7 +346,7 @@ const UserManagement = () => {
                 </div>
 
                 <div className="mt-4 h-2 rounded-full bg-slate-800">
-                  <div className="h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500" style={{ width: `${occupancy}%` }} />
+                  <div className="h-2 rounded-full bg-cyan-500" style={{ width: `${occupancy}%` }} />
                 </div>
 
                 <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
@@ -374,7 +379,7 @@ const UserManagement = () => {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-cyan-800/60 bg-gradient-to-br from-[#0f2747] via-[#0d2240] to-[#0a1c35] p-5 text-white shadow-[0_18px_36px_-26px_rgba(34,211,238,0.9)]">
+              <section className="rounded-2xl border border-slate-700 bg-[#111827] p-5 text-white">
                 <p className="text-xs uppercase tracking-wider text-slate-300">System Health</p>
                 <p className="mt-3 text-lg font-semibold leading-snug">
                   All internal authentication services are operational.
@@ -389,7 +394,7 @@ const UserManagement = () => {
 
             {error ? <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-red-200">{error}</div> : null}
 
-            <div className="overflow-hidden rounded-2xl border border-slate-700 bg-[#111827]/95 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.95)]">
+            <div className="overflow-hidden rounded-2xl border border-slate-700 bg-[#111827]">
               <div className="flex flex-col gap-3 border-b border-slate-800 px-5 py-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-2">
                   <button
@@ -530,7 +535,7 @@ const UserManagement = () => {
       </div>
 
       {showModal && (modalType === "add" || selectedUser) ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl border border-slate-700 bg-gray-800">
             <div className="p-6">
               <h3 className="mb-4 text-xl font-semibold text-white">

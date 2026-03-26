@@ -183,8 +183,6 @@ const ExpenseMonitor = () => {
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#0b1120] text-white">
-      <div className="pointer-events-none absolute left-[-120px] top-[-120px] h-[260px] w-[260px] rounded-full bg-cyan-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-[-140px] right-[-120px] h-[300px] w-[300px] rounded-full bg-blue-500/10 blur-3xl" />
       <div className="flex min-h-screen">
         <AdminSidebar currentRoute="/admin/expense-monitor" onNavigate={navigate} activeUsers={0} totalUsers={0} />
 
@@ -203,10 +201,10 @@ const ExpenseMonitor = () => {
               </div>
 
               <div className="flex items-center gap-3 text-slate-400">
-                <button className="rounded-full border border-slate-700 bg-[#111827] p-2 shadow-sm transition hover:border-slate-500" title="Alerts">
+                <button className="rounded-full border border-slate-700 bg-[#111827] p-2 transition hover:border-slate-500" title="Alerts">
                   <Bell size={15} />
                 </button>
-                <button className="rounded-full border border-slate-700 bg-[#111827] p-2 shadow-sm transition hover:border-slate-500" title="Help">
+                <button className="rounded-full border border-slate-700 bg-[#111827] p-2 transition hover:border-slate-500" title="Help">
                   <HelpCircle size={15} />
                 </button>
                 <AdminUserMenu />
@@ -223,15 +221,15 @@ const ExpenseMonitor = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-[#111827] p-3 shadow-[0_12px_28px_-20px_rgba(34,211,238,0.6)]">
+                <div className="rounded-2xl border border-slate-700 bg-[#111827] p-3">
                   <p className="text-[11px] uppercase tracking-wider text-slate-400">Pending Approval</p>
                   <p className="mt-1 text-2xl font-semibold">{formatCurrency(pendingAmount)}</p>
                 </div>
-                <div className="rounded-2xl border border-cyan-700/50 bg-gradient-to-b from-cyan-900/30 to-[#111827] p-3 shadow-[0_12px_28px_-20px_rgba(34,211,238,0.8)]">
+                <div className="rounded-2xl border border-slate-700 bg-[#111827] p-3">
                   <p className="text-[11px] uppercase tracking-wider text-slate-400">Approved Total</p>
                   <p className="mt-1 text-2xl font-semibold text-cyan-300">{formatCurrency(approvedTodayAmount)}</p>
                 </div>
-                <div className="rounded-2xl border border-rose-700/40 bg-gradient-to-b from-rose-900/20 to-[#111827] p-3 shadow-[0_12px_28px_-20px_rgba(244,63,94,0.7)]">
+                <div className="rounded-2xl border border-slate-700 bg-[#111827] p-3">
                   <p className="text-[11px] uppercase tracking-wider text-slate-400">Flags Found</p>
                   <p className="mt-1 text-2xl font-semibold text-rose-300">{String(flagsFound).padStart(2, "0")}</p>
                 </div>
@@ -285,7 +283,7 @@ const ExpenseMonitor = () => {
 
             {error ? <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-red-200">{error}</div> : null}
 
-            <div className="overflow-hidden rounded-2xl border border-slate-700 bg-[#111827] shadow-[0_20px_45px_-30px_rgba(8,47,73,0.9)]">
+            <div className="overflow-hidden rounded-2xl border border-slate-700 bg-[#111827]">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-[#0f172a]">
@@ -357,7 +355,7 @@ const ExpenseMonitor = () => {
             </div>
 
             <section className="mt-8 grid gap-5 xl:grid-cols-[2fr_1fr]">
-              <article className="rounded-2xl border border-cyan-800/40 bg-gradient-to-r from-[#0c1a34] via-[#0d2245] to-[#102b56] p-6 shadow-[0_20px_55px_-35px_rgba(34,211,238,0.9)]">
+              <article className="rounded-2xl border border-slate-700 bg-[#111827] p-6">
                 <p className="text-[11px] uppercase tracking-[0.22em] text-cyan-200/80">AI-Driven Insights</p>
                 <h3 className="mt-3 text-3xl font-semibold">Optimize Next-Month Spending</h3>
                 <p className="mt-3 max-w-2xl text-sm text-slate-200/90">
@@ -380,7 +378,7 @@ const ExpenseMonitor = () => {
                 </div>
 
                 <div className="mt-4 h-2 rounded-full bg-slate-800">
-                  <div className="h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500" style={{ width: `${consumption || 64}%` }} />
+                  <div className="h-2 rounded-full bg-cyan-500" style={{ width: `${consumption || 64}%` }} />
                 </div>
 
                 <p className="mt-4 text-xs text-slate-400">

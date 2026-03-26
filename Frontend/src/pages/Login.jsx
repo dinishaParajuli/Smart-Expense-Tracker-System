@@ -23,12 +23,12 @@ export default function Login() {
       // Persist auth session using normalized role/is_staff values.
       saveLoginSession(res.data);
 
-      alert("Login successful!");
+      alert("Logged in successfully.");
       navigate(getDashboardRouteByRole(res.data?.role), { replace: true });
 
     } catch (err) {
       console.error(err);
-      alert("Login failed! Check your credentials.");
+      alert("Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -40,45 +40,24 @@ export default function Login() {
 
         {/* LEFT SIDE */}
         <div className="w-1/2 hidden md:block relative">
-          <div className="absolute inset-0 bg-linear-to-br from-blue-600 via-blue-500 to-teal-400" />
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm p-12 flex flex-col justify-between text-white">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              💰 <span>AI Finance Advisor</span>
-            </div>
-            <div>
-              <h1 className="text-5xl font-bold leading-tight mb-6">
-                Welcome <br /> Back!
-              </h1>
-              <p className="text-lg opacity-90 mb-8 max-w-md">
-                Continue your journey to financial freedom with AI-powered insights
-              </p>
-              <div className="bg-white/20 backdrop-blur-md p-5 rounded-2xl mb-8 text-sm">
-                "A budget is telling your money where to go instead of wondering where it went."
-              </div>
-              <div className="flex gap-10">
-                <div>
-                  <p className="text-3xl font-bold">95%</p>
-                  <p className="text-sm opacity-80">Users save more</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold">NPR</p>
-                  <p className="text-sm opacity-80">Cash tracking</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-[#e9eef6]" />
+          <img
+            src="/login.jpg"
+            alt="Login background"
+            className="absolute inset-0 w-full h-full object-contain object-center"
+          />
         </div>
 
         {/* RIGHT SIDE */}
         <div className="w-full md:w-1/2 bg-[#0f172a] p-14 flex flex-col justify-center">
-          <h2 className="text-3xl font-bold text-white mb-2">Login to Your Account</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">Sign In to Your Account</h2>
           <p className="text-gray-400 mb-10">
-            Enter your credentials to access your dashboard
+            Enter your email and password to continue.
           </p>
 
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
-              <label className="text-gray-400 text-sm block mb-2">Email Address</label>
+              <label className="text-gray-400 text-sm block mb-2">Email</label>
               <input
                 type="email"
                 value={email}
@@ -115,7 +94,7 @@ export default function Login() {
               disabled={loading}
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 transition rounded-xl text-white font-semibold"
             >
-              {loading ? "Logging in..." : "Login to Dashboard"}
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 

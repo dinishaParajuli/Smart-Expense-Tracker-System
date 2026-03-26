@@ -43,7 +43,7 @@ export function EntryProvider({ children }) {
     if (hasAccessToken()) {
       refreshEntries().catch(() => {});
     }
-  }, []);
+  }, [refreshEntries]);
 
   const addEntry = async (entry) => {
     if (hasAccessToken()) {
@@ -113,6 +113,7 @@ export function EntryProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useEntry() {
   const context = useContext(EntryContext);
   if (!context) {

@@ -4,6 +4,62 @@ import { useNavigate } from "react-router-dom";
 import { useEntry } from "../Context/EntryContext";
 import BackButton from "../components/BackButton";
 
+const cx = (...classes) => classes.filter(Boolean).join(" ");
+
+const Card = ({ className = "", children }) => (
+  <section
+    className={cx(
+      "rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-sm transition-shadow duration-200 ease-out",
+      className
+    )}
+  >
+    {children}
+  </section>
+);
+
+const SectionHeader = ({ title, subtitle }) => (
+  <div className="mb-5">
+    <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
+    {subtitle ? <p className="mt-1.5 text-sm text-slate-400">{subtitle}</p> : null}
+  </div>
+);
+
+const Input = ({ className = "", ...props }) => (
+  <input
+    {...props}
+    className={cx(
+      "h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition-all duration-200 ease-out focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25",
+      className
+    )}
+  />
+);
+
+const Button = ({ variant = "primary", className = "", children, ...props }) => {
+  const styles = {
+    primary:
+      "border border-blue-600 bg-blue-600 text-white shadow-sm hover:bg-blue-500 focus:ring-blue-500/40",
+    secondary:
+      "border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 focus:ring-blue-500/30",
+    danger:
+      "border border-rose-700 bg-rose-900/30 text-rose-200 hover:bg-rose-900/50 focus:ring-rose-500/30",
+    ghost:
+      "border border-transparent bg-transparent text-slate-300 hover:bg-slate-800 focus:ring-blue-500/30",
+  };
+
+  return (
+    <button
+      {...props}
+      className={cx(
+        "inline-flex h-10 items-center justify-center rounded-lg px-3.5 text-sm font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70",
+        styles[variant],
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
+};
+
 const BudgetEntry = () => {
   const navigate = useNavigate();
   const { entries, loading, error, refreshEntries, addEntry, deleteEntry, updateEntry } = useEntry();
@@ -102,15 +158,18 @@ const BudgetEntry = () => {
     }
   };
 
-  const todayEntries = entries.filter((e) => e.date === date);
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  const todayEntries = entries.filter((e) => e.date === todayKey);
 
   const todayIncome = todayEntries
     .filter((e) => e.type === "income")
-    .reduce((s, e) => s + e.amount, 0);
+    .reduce((s, e) => s + (Number(e.amount) || 0), 0);
 
   const todayExpenses = todayEntries
     .filter((e) => e.type === "expense")
-    .reduce((s, e) => s + e.amount, 0);
+    .reduce((s, e) => s + Math.abs(Number(e.amount) || 0), 0);
 
   const todayNet = todayIncome - todayExpenses;
 
@@ -121,282 +180,280 @@ const BudgetEntry = () => {
       minimumFractionDigits: 0,
     }).format(amt);
 
-  const formatDate = (d) => format(new Date(d), "MMM d, yyyy");
+  const formatDate = (d) => {
+    const [year, month, day] = String(d).split("-").map(Number);
+    return format(new Date(year, month - 1, day), "MMM d, yyyy");
+  };
 
   return (
-    <div className="min-h-screen bg-[#0a0f1f] p-6 text-white">
-      <div className="max-w-7xl mx-auto">
-
-        {/* HEADER */}
+    <div className="min-h-screen bg-slate-950 p-4 text-slate-100 sm:p-6">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Budget Entry</h1>
-            <p className="text-[#94a3b8]">Add your transactions manually</p>
+            <h1 className="text-2xl font-semibold text-slate-100">Budget Entry</h1>
+            <p className="mt-1.5 text-sm text-slate-400">Add your transactions manually</p>
           </div>
           <BackButton />
         </div>
 
         {error && (
-          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <div className="mb-4 rounded-lg border border-amber-700 bg-amber-900/30 px-4 py-3 text-sm text-amber-200">
             {error}
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
-
-          {/* LEFT SIDE */}
-          <div className="lg:col-span-2 space-y-6">
-
-            {/* FORM CARD */}
-            <div className="rounded-xl border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
-              <h2 className="font-semibold text-lg mb-4">
-                {editingId !== null ? "✏️ Edit Entry" : "Add New Entry"}
-              </h2>
-
-              {/* TYPE */}
-              <div className="mb-4">
-                <p className="mb-2 text-sm text-[#cbd5e1]">Entry Type</p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleTypeChange("expense")}
-                    className={`px-4 py-2 rounded ${
-                      entryType === "expense"
-                        ? "bg-red-500 text-white"
-                        : "bg-[#1f2937] text-[#cbd5e1]"
-                    }`}
-                  >
-                    Expense
-                  </button>
-
-                  <button
-                    onClick={() => handleTypeChange("income")}
-                    className={`px-4 py-2 rounded ${
-                      entryType === "income"
-                        ? "bg-green-500 text-white"
-                        : "bg-[#1f2937] text-[#cbd5e1]"
-                    }`}
-                  >
-                    Income
-                  </button>
-                </div>
-              </div>
-
-              {/* AMOUNT */}
-              <div className="mb-4">
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full rounded border border-white/15 bg-[#0f172a] p-2 text-white placeholder:text-[#94a3b8] focus:border-blue-500 focus:outline-none"
-                />
-
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {quickAmounts.map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => setAmount(q)}
-                      className="rounded bg-[#1f2937] px-3 py-1 text-sm text-[#cbd5e1] hover:bg-[#334155]"
-                    >
-                      +{q >= 1000 ? `${q / 1000}K` : q}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* CATEGORY */}
-              <div className="mb-4">
-                <p className="mb-2 text-sm text-[#cbd5e1]">Category</p>
-                <div className="flex flex-wrap gap-2">
-                  {(entryType === "expense"
-                    ? expenseCategories
-                    : incomeCategories
-                  ).map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setCategory(cat)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        category === cat
-                          ? "bg-blue-500 text-white"
-                            : "bg-[#1f2937] text-[#cbd5e1]"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* PAYMENT */}
-              <div className="mb-4">
-                <p className="mb-2 text-sm text-[#cbd5e1]">Payment Method</p>
-                <div className="flex flex-wrap gap-2">
-                  {paymentMethods.map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setPaymentMethod(m)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        paymentMethod === m
-                          ? "bg-purple-500 text-white"
-                            : "bg-[#1f2937] text-[#cbd5e1]"
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* DATE */}
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="mb-4 w-full rounded border border-white/15 bg-[#0f172a] p-2 text-white focus:border-blue-500 focus:outline-none"
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="space-y-6 lg:col-span-7">
+            <Card>
+              <SectionHeader
+                title={editingId !== null ? "Edit Entry" : "Add New Entry"}
+                subtitle="Fill in the details below to record your transaction."
               />
 
-              {/* NOTES */}
-              <div className="mb-4">
-                <label className="text-sm mb-1 block">
+              <div className="mb-6">
+                <label className="mb-2 block text-sm font-medium text-slate-300">Entry Type</label>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => handleTypeChange("expense")}
+                    variant={entryType === "expense" ? "primary" : "secondary"}
+                    className="min-w-[110px]"
+                    type="button"
+                  >
+                    Expense
+                  </Button>
+                  <Button
+                    onClick={() => handleTypeChange("income")}
+                    variant={entryType === "income" ? "primary" : "secondary"}
+                    className="min-w-[110px]"
+                    type="button"
+                  >
+                    Income
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="amount" className="mb-2 block text-sm font-medium text-slate-300">
+                  Amount
+                </label>
+                <Input
+                  id="amount"
+                  type="number"
+                  placeholder="e.g., 3500"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <p className="mt-1.5 text-xs text-slate-400">Use a positive amount in NPR.</p>
+
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {quickAmounts.map((q) => (
+                    <Button
+                      key={q}
+                      onClick={() => setAmount(q)}
+                      variant="secondary"
+                      type="button"
+                      className="h-8 px-2.5 text-xs"
+                    >
+                      +{q >= 1000 ? `${q / 1000}K` : q}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-6 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="category" className="mb-2 block text-sm font-medium text-slate-300">
+                    Category
+                  </label>
+                  <select
+                    id="category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 transition-all duration-200 ease-out focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+                  >
+                    <option value="">Select category</option>
+                    {(entryType === "expense" ? expenseCategories : incomeCategories).map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1.5 text-xs text-slate-400">Choose the closest category for clearer reports.</p>
+                </div>
+
+                <div>
+                  <label htmlFor="paymentMethod" className="mb-2 block text-sm font-medium text-slate-300">
+                    Payment Method
+                  </label>
+                  <select
+                    id="paymentMethod"
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 transition-all duration-200 ease-out focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+                  >
+                    {paymentMethods.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="entryDate" className="mb-2 block text-sm font-medium text-slate-300">
+                  Date
+                </label>
+                <Input
+                  id="entryDate"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="mb-2 block text-sm font-medium text-slate-300" htmlFor="notes">
                   Notes
                   {entryType === "expense" && category === "Other" && (
-                    <span className="text-red-500 ml-1">* required</span>
+                    <span className="ml-1 text-red-600">* required</span>
                   )}
                 </label>
                 <textarea
+                  id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={entryType === "expense" && category === "Other" ? "Describe this expense..." : "Notes (optional)"}
-                  className={`w-full border rounded p-2 ${
+                  className={cx(
+                    "w-full rounded-lg border bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition-all duration-200 ease-out focus:outline-none focus:ring-2",
                     entryType === "expense" && category === "Other" && !notes.trim()
-                      ? "border-red-400 focus:ring-red-400"
-                      : "border-white/15"
-                  } bg-[#0f172a] text-white placeholder:text-[#94a3b8] focus:outline-none focus:ring-2`}
+                      ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
+                      : "border-slate-700 focus:border-blue-500 focus:ring-blue-500/25"
+                  )}
                   rows={3}
                 />
               </div>
 
-              {/* ACTIONS */}
-              <div className="flex gap-3">
-                <button
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
                   onClick={handleSaveEntry}
                   disabled={loading}
-                  className="flex-1 bg-green-500 text-white py-2 rounded"
+                  className="min-w-[160px]"
                 >
-                  {loading ? "Saving..." : editingId !== null ? "Update Entry" : "Save"}
-                </button>
+                  {loading ? "Saving..." : editingId !== null ? "Update Entry" : "Save Entry"}
+                </Button>
                 {editingId !== null ? (
-                  <button
+                  <Button
                     onClick={handleCancelEdit}
-                    className="flex-1 rounded bg-slate-500 py-2 text-white"
+                    variant="secondary"
+                    type="button"
+                    className="min-w-[140px]"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    onClick={() => { setAmount(""); setCategory(""); setNotes(""); }}
-                    className="flex-1 rounded bg-slate-600 py-2 text-white"
+                  <Button
+                    onClick={() => {
+                      setAmount("");
+                      setCategory("");
+                      setNotes("");
+                    }}
+                    variant="secondary"
+                    type="button"
+                    className="min-w-[140px]"
                   >
                     Clear
-                  </button>
+                  </Button>
                 )}
               </div>
-            </div>
-
+            </Card>
           </div>
 
-          {/* RIGHT SIDE */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:col-span-5">
+            <Card>
+              <SectionHeader title="Today's Summary" subtitle={formatDate(todayKey)} />
+              <p className="mb-3 text-xs text-slate-400">{todayEntries.length} entries for this date</p>
 
-            {/* SUMMARY */}
-            <div className="rounded-xl border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
-              <h3 className="font-semibold mb-2">Today's Summary</h3>
-              <p className="mb-3 text-sm text-[#94a3b8]">{formatDate(date)}</p>
-
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Income</span>
-                  <span className="text-green-500 font-semibold">
-                    {formatCurrency(todayIncome)}
-                  </span>
+              <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950 text-sm">
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  <span className="text-slate-300">Income</span>
+                  <span className="text-right font-medium tabular-nums text-emerald-400">{formatCurrency(todayIncome)}</span>
                 </div>
 
-                <div className="flex justify-between">
-                  <span>Expenses</span>
-                  <span className="text-red-500 font-semibold">
-                    {formatCurrency(todayExpenses)}
-                  </span>
+                <div className="h-px bg-slate-800" />
+
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  <span className="text-slate-300">Expenses</span>
+                  <span className="text-right font-medium tabular-nums text-rose-400">-{formatCurrency(todayExpenses)}</span>
                 </div>
 
-                <div className="flex justify-between border-t pt-2 font-semibold">
-                  <span>Net</span>
-                  <span
-                    className={
-                      todayNet >= 0 ? "text-green-500" : "text-red-500"
-                    }
-                  >
+                <div className="h-px bg-slate-800" />
+
+                <div className="flex items-center justify-between bg-slate-800 px-3 py-3">
+                  <span className="text-sm font-semibold text-slate-100">Net</span>
+                  <span className={cx("text-right text-sm font-semibold tabular-nums", todayNet >= 0 ? "text-emerald-400" : "text-rose-400")}>
                     {formatCurrency(todayNet)}
                   </span>
                 </div>
               </div>
-            </div>
+            </Card>
 
-            {/* RECENT */}
-            <div className="rounded-xl border border-white/10 bg-[#111828] p-6 shadow-[0_18px_35px_-24px_rgba(2,6,23,0.9)]">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">Recent Entries</h3>
-                <span className="text-xs text-[#94a3b8]">{entries.length} total</span>
+            <Card>
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-base font-semibold text-slate-100">Recent Entries</h3>
+                <span className="text-xs text-slate-400">{entries.length} total</span>
               </div>
 
               <div className="space-y-3">
                 {entries.slice(0, 5).map((e) => (
-                  <div key={e.id} className="rounded-lg border border-white/10 bg-[#0f172a] p-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-sm">{e.category}</p>
-                        <p className="text-xs text-[#94a3b8]">{formatDate(e.date)}</p>
+                  <div
+                    key={e.id}
+                    className="rounded-lg border border-slate-800 bg-slate-950 p-3.5 transition-all duration-200 ease-out hover:bg-slate-800 hover:shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-slate-100">{e.category}</p>
+                        <p className="text-xs text-slate-400">{formatDate(e.date)}</p>
                         {e.notes ? (
-                          <p className="mt-0.5 max-w-35 truncate text-xs italic text-[#94a3b8]">{e.notes}</p>
+                          <p className="mt-1 max-w-44 truncate text-xs italic text-slate-400">{e.notes}</p>
                         ) : null}
                       </div>
-                      <span
-                        className={`font-semibold text-sm ${
-                          e.type === "income" ? "text-green-500" : "text-red-500"
-                        }`}
-                      >
-                        {e.type === "income" ? "+" : "-"}{formatCurrency(e.amount)}
+                      <span className={cx("shrink-0 text-sm font-medium tabular-nums", e.type === "income" ? "text-emerald-400" : "text-rose-400")}>
+                        {e.type === "income" ? "+" : "-"}
+                        {formatCurrency(e.amount)}
                       </span>
                     </div>
-                    <div className="flex gap-2 mt-2">
-                      <button
+
+                    <div className="mt-2 flex gap-2">
+                      <Button
                         onClick={() => handleEditEntry(e)}
-                        className="flex-1 rounded bg-blue-500/20 py-1 text-xs text-blue-300 hover:bg-blue-500/30"
+                        variant="secondary"
+                        className="h-8 flex-1 text-xs"
+                        type="button"
                       >
-                        ✏️ Edit
-                      </button>
-                      <button
+                        Edit
+                      </Button>
+                      <Button
                         onClick={() => handleDeleteEntry(e.id)}
-                        className="flex-1 rounded bg-red-500/20 py-1 text-xs text-red-300 hover:bg-red-500/30"
+                        variant="danger"
+                        className="h-8 flex-1 text-xs"
+                        type="button"
                       >
-                        🗑️ Delete
-                      </button>
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 ))}
 
                 {entries.length === 0 && (
-                  <p className="py-4 text-center text-sm text-[#94a3b8]">No entries yet</p>
+                  <p className="py-4 text-center text-sm text-slate-400">No entries yet</p>
                 )}
               </div>
 
-              <button
-                onClick={() => navigate("/all-entries")}
-                className="mt-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-              >
-                See All Entries →
-              </button>
-            </div>
-
+              <Button onClick={() => navigate("/all-entries")} className="mt-4 w-full">
+                See All Entries
+              </Button>
+            </Card>
           </div>
         </div>
       </div>

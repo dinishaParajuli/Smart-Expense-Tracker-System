@@ -1,8 +1,38 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
 import { fetchBudgets, createBudget, deleteBudget } from "../api";
 
+const cls = (...values) => values.filter(Boolean).join(" ");
+
+const Card = ({ children, className = "" }) => (
+  <section className={cls("rounded-xl border border-slate-800 bg-slate-900 shadow-sm", className)}>{children}</section>
+);
+
+const SectionHeader = ({ title, subtitle, right }) => (
+  <div className="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+    <div>
+      <h2 className="text-base font-semibold text-slate-100">{title}</h2>
+      {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
+    </div>
+    {right}
+  </div>
+);
+
+const Button = ({ variant = "primary", className = "", ...props }) => {
+  const base = "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed";
+  const styles = {
+    primary: "bg-blue-600 text-white hover:bg-blue-500",
+    secondary: "border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700",
+    danger: "border border-rose-700 bg-rose-900/30 text-rose-200 hover:bg-rose-900/50",
+    ghost: "text-slate-300 hover:bg-slate-800",
+  };
+
+  return <button className={cls(base, styles[variant], className)} {...props} />;
+};
+
 const BudgetPlanner = () => {
+  const navigate = useNavigate();
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -61,6 +91,11 @@ const BudgetPlanner = () => {
 
       if (!newBudgetForm.category || !newBudgetForm.amount) {
         setError("Please fill in all required fields");
+        return;
+      }
+
+      if (parseFloat(newBudgetForm.amount) < 0) {
+        setError("Budget amount cannot be negative");
         return;
       }
 
@@ -158,348 +193,295 @@ const BudgetPlanner = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "amount" && value !== "" && Number(value) < 0) {
+      setError("Budget amount cannot be negative");
+      return;
+    }
+
+    if (name === "amount" && error) {
+      setError("");
+    }
+
     setNewBudgetForm({
       ...newBudgetForm,
       [name]: value,
     });
   };
 
+  const inputClass =
+    "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6">
-      <BackButton />
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <BackButton />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 mt-6">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Budget Planner
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Set and manage your monthly budgets
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm transition duration-300 transform hover:scale-105">
-            Export Report
-          </button>
-          <button className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-sm font-medium transition duration-300 shadow-lg transform hover:scale-105">
-            Save Changes
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
-          {error}
-        </div>
-      )}
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        <div className="bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700 hover:border-gray-600 transition duration-300 transform hover:scale-105">
-          <p className="text-gray-400 text-sm">Total Budget</p>
-          <h2 className="text-3xl font-bold text-blue-400 mt-2">
-            NPR {summary.budget.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-          </h2>
-          <p className="text-xs text-gray-500 mt-2">For this month</p>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700 hover:border-gray-600 transition duration-300 transform hover:scale-105">
-          <p className="text-gray-400 text-sm">Total Spent</p>
-          <h2 className="text-3xl font-bold text-red-400 mt-2">
-            NPR {summary.spent.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-          </h2>
-          <div className="mt-3 flex items-center gap-2">
-            <div className="flex-1 bg-gray-700 rounded-full h-2.5 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-red-500 to-red-600 h-2.5 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(summary.spentPercentage, 100)}%` }}
-              />
-            </div>
-            <span className="text-xs text-gray-400 min-w-12">
-              {summary.spentPercentage.toFixed(1)}%
-            </span>
+        <div className="mt-6 mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-100 sm:text-4xl">Budget Planner</h1>
+            <p className="mt-1 text-sm text-slate-400">Set and manage your monthly budgets.</p>
           </div>
-          <p className="text-xs text-gray-500 mt-2">of total budget used</p>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700 hover:border-gray-600 transition duration-300 transform hover:scale-105">
-          <p className="text-gray-400 text-sm">Remaining</p>
-          <h2 className="text-3xl font-bold text-green-400 mt-2">
-            NPR {summary.remaining.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-          </h2>
-          <p className="text-xs text-gray-500 mt-2">
-            {totals.budget > 0 ? ((summary.remaining / totals.budget) * 100).toFixed(1) : 0}% left to spend
-          </p>
-        </div>
-      </div>
-
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Left Column - Add Budget Form */}
-        <div className="space-y-6">
-          {/* Add Budget Form */}
-          <div className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden hover:border-gray-600 transition duration-300">
-            <div className="p-5 border-b border-gray-700 bg-gray-800/30">
-              <h2 className="font-semibold text-lg">Add New Budget</h2>
-            </div>
-
-            <form onSubmit={handleAddBudget} className="p-5 space-y-4">
-              <div>
-                <label className="text-sm text-gray-400 block mb-2">
-                  Budget Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="e.g., Monthly Food Budget"
-                  value={newBudgetForm.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-400 block mb-2">
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={newBudgetForm.category}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-white focus:border-blue-500 focus:outline-none transition"
-                >
-                  <option value="">Select Category</option>
-                  {expenseCategories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-400 block mb-2">
-                  Budget Amount
-                </label>
-                <input
-                  type="number"
-                  name="amount"
-                  placeholder="Amount"
-                  value={newBudgetForm.amount}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-400 block mb-2">
-                  Period
-                </label>
-                <select
-                  name="period"
-                  value={newBudgetForm.period}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700/50 border border-gray-600 text-white focus:border-blue-500 focus:outline-none transition"
-                >
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="yearly">Yearly</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-400 block mb-2">
-                  Color
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {colorOptions.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() =>
-                        setNewBudgetForm({ ...newBudgetForm, color })
-                      }
-                      className={`w-8 h-8 rounded-full ${color} ${
-                        newBudgetForm.color === color
-                          ? "ring-2 ring-white"
-                          : "ring-1 ring-gray-600"
-                      } transition`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-2 rounded-lg font-medium transition duration-300 transform hover:scale-105 disabled:opacity-50"
-              >
-                {loading ? "Adding..." : "Add Budget"}
-              </button>
-            </form>
-          </div>
-
-          {/* Budget Categories */}
-          <div className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden hover:border-gray-600 transition duration-300">
-            <div className="flex justify-between items-center p-5 border-b border-gray-700 bg-gray-800/30">
-              <h2 className="font-semibold text-lg">Your Budgets</h2>
-              <span className="text-xs text-gray-400">{budgets.length} budgets</span>
-            </div>
-
-            <div className="divide-y divide-gray-700 max-h-[500px] overflow-y-auto">
-              {budgets && budgets.length > 0 ? (
-                budgets.map((budget) => {
-                  const percentage = getPercentage(budget.spent, budget.amount);
-                  const isOverBudget = budget.spent > budget.amount;
-                  const progressColor = getProgressColor(percentage);
-
-                  return (
-                    <div
-                      key={budget.id}
-                      className="p-5 hover:bg-gray-700/50 transition duration-300 cursor-pointer"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="font-medium text-base hover:text-blue-400 transition">
-                            {budget.category}
-                          </h3>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Budget: NPR{" "}
-                            {parseFloat(budget.amount).toLocaleString("en-IN", {
-                              maximumFractionDigits: 0,
-                            })}
-                          </p>
-                        </div>
-                        <div className="text-right flex flex-col items-end gap-2">
-                          <div>
-                            <span
-                              className={`font-bold text-lg transition ${
-                                isOverBudget ? "text-red-400" : "text-white"
-                              }`}
-                            >
-                              NPR{" "}
-                              {parseFloat(budget.spent).toLocaleString("en-IN", {
-                                maximumFractionDigits: 0,
-                              })}
-                            </span>
-                            <span className="text-gray-400 text-sm block">
-                              / {parseFloat(budget.amount).toLocaleString("en-IN", { maximumFractionDigits: 0})}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteBudget(budget.id)}
-                            className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded transition"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="mt-3">
-                        <div className="w-full bg-gray-700 h-3 rounded-full overflow-hidden shadow-inner">
-                          <div
-                            className={`${progressColor} h-3 rounded-full transition-all duration-500 shadow-lg`}
-                            style={{ width: `${Math.min(percentage, 100)}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs mt-2">
-                          <span className="text-gray-400 font-medium">
-                            {percentage.toFixed(0)}% used
-                          </span>
-                          {isOverBudget && (
-                            <span className="text-red-400 font-semibold animate-pulse">
-                              ⚠️ Over budget by NPR{" "}
-                              {(budget.spent - budget.amount).toLocaleString("en-IN", {
-                                maximumFractionDigits: 0,
-                              })}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="p-5 text-center text-gray-400">
-                  {loading ? "Loading budgets..." : "No budgets yet. Add one to get started!"}
-                </div>
-              )}
-            </div>
+          <div className="flex gap-3">
+            <Button variant="secondary">Export Report</Button>
+            <Button variant="primary">Save Changes</Button>
           </div>
         </div>
 
-        {/* Right Column - AI Suggestions */}
-        <div className="space-y-6">
-          {/* AI Suggestions Header */}
-          <div className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-xl p-5 border border-purple-500/50 backdrop-blur-sm hover:border-purple-500/70 transition duration-300">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl animate-pulse">🤖</span>
-              <h2 className="font-bold text-xl">AI Budget Suggestions</h2>
-            </div>
-            <p className="text-sm text-gray-300">
-              Personalized recommendations based on your spending habits
-            </p>
-          </div>
+        {error ? (
+          <div className="mb-6 rounded-lg border border-rose-700/50 bg-rose-950/30 px-4 py-3 text-sm text-rose-200">{error}</div>
+        ) : null}
 
-          {/* Suggestions List */}
-          <div className="space-y-4">
-            {suggestions.length > 0 ? (
-              suggestions.map((suggestion, idx) => (
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card className="p-5">
+            <p className="text-sm text-slate-400">Total Budget</p>
+            <h2 className="mt-2 text-3xl font-semibold text-slate-100">
+              NPR {summary.budget.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+            </h2>
+            <p className="mt-2 text-xs text-slate-500">For this month</p>
+          </Card>
+
+          <Card className="p-5">
+            <p className="text-sm text-slate-400">Total Spent</p>
+            <h2 className="mt-2 text-3xl font-semibold text-slate-100">
+              NPR {summary.spent.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+            </h2>
+            <div className="mt-3 flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800">
                 <div
-                  key={suggestion.id}
-                  className="bg-gray-800/50 rounded-xl p-5 border border-gray-700 hover:border-blue-500/50 transition duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-xl flex items-center justify-center flex-shrink-0 border border-blue-500/30">
-                      <span className="text-2xl">💡</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-white text-base hover:text-blue-400 transition">
-                        {suggestion.title}
-                      </h3>
-                      <p className="text-sm text-gray-300 mt-2 line-clamp-2">
-                        {suggestion.description}
-                      </p>
-                      <div className="flex gap-2 mt-4 flex-wrap">
-                        <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-1.5 rounded-lg text-sm font-medium transition duration-300 transform hover:scale-105">
-                          {suggestion.action}
-                        </button>
-                        <button className="bg-gray-700 hover:bg-gray-600 px-4 py-1.5 rounded-lg text-sm transition duration-300 transform hover:scale-105">
-                          Dismiss
-                        </button>
-                      </div>
-                    </div>
+                  className="h-1.5 rounded-full bg-rose-500 transition-all duration-300"
+                  style={{ width: `${Math.min(summary.spentPercentage, 100)}%` }}
+                />
+              </div>
+              <span className="min-w-11 text-xs text-slate-400">{summary.spentPercentage.toFixed(1)}%</span>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">Of total budget used</p>
+          </Card>
+
+          <Card className="p-5">
+            <p className="text-sm text-slate-400">Remaining</p>
+            <h2 className="mt-2 text-3xl font-semibold text-slate-100">
+              NPR {summary.remaining.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+            </h2>
+            <p className="mt-2 text-xs text-slate-500">
+              {totals.budget > 0 ? ((summary.remaining / totals.budget) * 100).toFixed(1) : 0}% left to spend
+            </p>
+          </Card>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="space-y-6 lg:col-span-7">
+            <Card>
+              <SectionHeader title="Add New Budget" subtitle="Create a budget by category and period." />
+              <form onSubmit={handleAddBudget} className="space-y-4 p-5">
+                <div>
+                  <label htmlFor="budget-name" className="mb-1.5 block text-sm font-medium text-slate-300">
+                    Budget Name
+                  </label>
+                  <input
+                    id="budget-name"
+                    type="text"
+                    name="name"
+                    placeholder="Monthly Food Budget"
+                    value={newBudgetForm.name}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="budget-category" className="mb-1.5 block text-sm font-medium text-slate-300">
+                    Category
+                  </label>
+                  <select
+                    id="budget-category"
+                    name="category"
+                    value={newBudgetForm.category}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  >
+                    <option value="">Select category</option>
+                    {expenseCategories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="budget-amount" className="mb-1.5 block text-sm font-medium text-slate-300">
+                      Budget Amount
+                    </label>
+                    <input
+                      id="budget-amount"
+                      type="number"
+                      min="0"
+                      name="amount"
+                      placeholder="Amount"
+                      value={newBudgetForm.amount}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="budget-period" className="mb-1.5 block text-sm font-medium text-slate-300">
+                      Period
+                    </label>
+                    <select
+                      id="budget-period"
+                      name="period"
+                      value={newBudgetForm.period}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                    >
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700 text-center text-gray-400">
-                Keep spending below 80% of your budgets for better recommendations!
+
+                <div>
+                  <p className="mb-2 text-sm font-medium text-slate-300">Color</p>
+                  <div className="flex flex-wrap gap-2">
+                    {colorOptions.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        aria-label={`Set budget color ${color}`}
+                        onClick={() => setNewBudgetForm({ ...newBudgetForm, color })}
+                        className={cls(
+                          "h-7 w-7 rounded-full transition-colors",
+                          color,
+                          newBudgetForm.color === color ? "ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900" : "ring-1 ring-slate-700"
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? "Adding..." : "Add Budget"}
+                </Button>
+              </form>
+            </Card>
+
+            <Card>
+              <SectionHeader
+                title="Your Budgets"
+                subtitle="Track budget usage and remaining balance by category."
+                right={<span className="rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-400">{budgets.length} budgets</span>}
+              />
+
+              <div className="max-h-[560px] divide-y divide-slate-800 overflow-y-auto">
+                {budgets && budgets.length > 0 ? (
+                  budgets.map((budget) => {
+                    const percentage = getPercentage(budget.spent, budget.amount);
+                    const isOverBudget = budget.spent > budget.amount;
+                    const progressColor = getProgressColor(percentage);
+
+                    return (
+                      <div key={budget.id} className="px-5 py-4 transition-colors hover:bg-slate-800/40">
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-base font-medium text-slate-100">{budget.category}</h3>
+                            <p className="mt-1 text-xs text-slate-400">
+                              Budget: NPR {parseFloat(budget.amount).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-2 text-right">
+                            <div>
+                              <p className={cls("text-lg font-semibold", isOverBudget ? "text-rose-300" : "text-slate-100")}>
+                                NPR {parseFloat(budget.spent).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                / {parseFloat(budget.amount).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                              </p>
+                            </div>
+                            <Button variant="danger" className="px-2.5 py-1 text-xs" onClick={() => handleDeleteBudget(budget.id)}>
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+                            <div className={cls(progressColor, "h-1.5 rounded-full transition-all duration-300")} style={{ width: `${Math.min(percentage, 100)}%` }} />
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <span className="text-slate-400">{percentage.toFixed(0)}% used</span>
+                            {isOverBudget ? (
+                              <span className="font-medium text-rose-300">
+                                Over budget by NPR {(budget.spent - budget.amount).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="px-5 py-12 text-center text-sm text-slate-400">
+                    {loading ? "Loading budgets..." : "No budgets yet. Add one to get started."}
+                  </div>
+                )}
               </div>
-            )}
+            </Card>
           </div>
 
-          {/* Quick Tips */}
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 rounded-xl p-5 border border-gray-700 hover:border-gray-600 transition duration-300">
-            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-              <span className="text-2xl">📌</span> Quick Budget Tips
-            </h3>
-            <ul className="space-y-3 text-sm text-gray-300">
-              {[
-                "Track daily expenses to stay within budget",
-                "Set aside 20% of income for savings first",
-                "Review and adjust budgets monthly",
-                "Build emergency fund for unexpected expenses",
-              ].map((tip, idx) => (
-                <li key={idx} className="flex items-start gap-3 hover:text-gray-100 transition">
-                  <span className="text-green-400 font-bold text-lg mt-0.5">✓</span>
-                  <span className="flex-1">{tip}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="space-y-6 lg:col-span-5">
+            <Card>
+              <SectionHeader
+                title="Budget Suggestions"
+                subtitle="Recommendations based on your current spending behavior."
+              />
+
+              <div className="space-y-3 p-5">
+                {suggestions.length > 0 ? (
+                  suggestions.map((suggestion) => (
+                    <div key={suggestion.id} className="rounded-lg border border-slate-800 bg-slate-950 p-4">
+                      <h3 className="text-sm font-semibold text-slate-100">{suggestion.title}</h3>
+                      <p className="mt-2 text-sm text-slate-400">{suggestion.description}</p>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button variant="primary" className="px-3 py-1.5 text-xs" onClick={() => navigate("/dashboard")}>
+                          {suggestion.action}
+                        </Button>
+                        <Button variant="secondary" className="px-3 py-1.5 text-xs">
+                          Dismiss
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-400">
+                    Keep spending below 80% of your budgets for better recommendations.
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <Card>
+              <SectionHeader title="Quick Budget Tips" subtitle="Simple practices to stay financially disciplined." />
+
+              <ul className="space-y-3 p-5 text-sm text-slate-300">
+                {[
+                  "Track daily expenses to stay within budget.",
+                  "Set aside 20% of income for savings first.",
+                  "Review and adjust budgets monthly.",
+                  "Build an emergency fund for unexpected expenses.",
+                ].map((tip, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-slate-500" />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
           </div>
         </div>
       </div>

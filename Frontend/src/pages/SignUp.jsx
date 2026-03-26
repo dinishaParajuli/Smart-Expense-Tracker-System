@@ -64,34 +64,17 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0b1120] p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#1b2435] p-6">
       <div className="w-full max-w-6xl h-180 bg-[#111827] rounded-3xl shadow-2xl flex overflow-hidden">
 
         {/* LEFT SIDE */}
         <div className="w-1/2 hidden md:block relative">
-          <div className="absolute inset-0 bg-linear-to-br from-purple-600 via-indigo-500 to-blue-500" />
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm p-12 flex flex-col justify-between text-white">
-            <div className="text-lg font-semibold">🚀 AI Finance Advisor</div>
-            <div>
-              <h1 className="text-5xl font-bold leading-tight mb-6">Join Us <br /> Today!</h1>
-              <p className="text-lg opacity-90 mb-8 max-w-md">
-                Start managing your finances smarter with AI-powered insights and tracking tools.
-              </p>
-              <div className="bg-white/20 backdrop-blur-md p-5 rounded-2xl mb-8 text-sm">
-                "The best time to start saving was yesterday. The next best time is now."
-              </div>
-              <div className="flex gap-10">
-                <div>
-                  <p className="text-3xl font-bold">10K+</p>
-                  <p className="text-sm opacity-80">Active Users</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold">24/7</p>
-                  <p className="text-sm opacity-80">AI Support</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-[#e9eef6]" />
+          <img
+            src="/Register.jpg"
+            alt="Signup background"
+            className="absolute inset-0 w-full h-full object-contain object-center"
+          />
         </div>
 
         {/* RIGHT SIDE */}
@@ -158,7 +141,7 @@ export default function SignUp() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 transition rounded-xl text-white font-semibold"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 transition rounded-xl text-white font-semibold"
             >
               {loading ? "Creating Account..." : "Create Account"}
             </button>
@@ -167,7 +150,7 @@ export default function SignUp() {
 
           <p className="text-gray-400 text-sm mt-8 text-center">
             Already have an account?{" "}
-            <Link to="/login" className="text-purple-400 hover:underline cursor-pointer">
+            <Link to="/login" className="text-blue-400 hover:underline cursor-pointer">
               Login here
             </Link>
           </p>

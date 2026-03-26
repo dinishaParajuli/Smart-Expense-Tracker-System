@@ -6,7 +6,7 @@ function Homepage() {
   return (
     <div className="bg-[#0a0f1f] text-white min-h-screen overflow-x-hidden font-sans">
       {/* ================== NAVBAR ================== */}
-      <nav className="fixed top-0 left-0 right-0 py-[18px] px-5 md:px-[60px] flex justify-between items-center bg-[rgba(255,255,255,0.05)] backdrop-blur-[12px] border-b border-[rgba(255,255,255,0.08)] z-[1000]">
+      <nav className="fixed top-0 left-0 right-0 py-[18px] px-6 md:px-[80px] flex justify-between items-center bg-[rgba(255,255,255,0.05)] backdrop-blur-[12px] border-b border-[rgba(255,255,255,0.08)] z-[1000]">
         <div className="flex items-center gap-3">
           <img
             src="/JPG.jpg"
@@ -36,10 +36,10 @@ function Homepage() {
       </nav>
 
       {/* ================== HERO SECTION ================== */}
-      <section className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-0 px-5 md:px-[60px] pt-[120px] lg:pt-[150px] pb-20 lg:pb-20">
+      <section className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-12 px-6 md:px-[80px] pt-[120px] lg:pt-[150px] pb-20 lg:pb-20">
         <div className="max-w-full lg:max-w-[50%] text-center lg:text-left">
           <div className="bg-[rgba(0,122,255,0.2)] text-[#3b82f6] px-4 py-1.5 rounded-full text-sm inline-block mb-4">
-            💠 AI-Powered Financial Intelligence
+            AI-Powered Financial Intelligence
           </div>
 
           <h1 className="text-[48px] leading-none font-semibold mb-6">
@@ -81,49 +81,47 @@ function Homepage() {
           </div>
         </div>
 
-        <div className="relative w-full lg:w-auto max-w-[420px] mx-auto lg:mx-0">
-          <img
-            src="/expense-tracker-homepage-image.jpg"
-            alt="POS Payment Image"
-            className="w-full rounded-2xl shadow-2xl"
-          />
-          <div className="absolute top-5 -right-5 bg-[rgba(34,197,94,0.15)] backdrop-blur-[10px] border border-green-500/40 px-5 py-3 rounded-2xl text-center">
-            <span className="text-green-300 text-sm">Monthly Savings</span><br />
-            <strong className="text-green-400 text-xl">+ NPR 5,240</strong>
+        <div className="relative w-full max-w-[620px] mx-auto lg:mx-0 lg:ml-6">
+          <div className="relative rounded-[26px] border border-white/15 bg-white/95 p-4 sm:p-5">
+            <img
+              src="/home.jpg"
+              alt="POS Payment Image"
+              className="w-full max-h-[340px] sm:max-h-[400px] lg:max-h-[460px] object-contain rounded-2xl"
+            />
           </div>
         </div>
       </section>
 
       {/* ================== FEATURES SECTION ================== */}
-      <section className="py-20 px-5 md:px-[60px] text-center">
+      <section className="py-20 px-6 md:px-[80px] text-center">
         <h2 className="text-[32px] font-semibold">Powerful Features for Nepal</h2>
         <p className="text-[#94a3b8] mt-3 text-lg">Designed specifically for cash-based economy challenges</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
           {/* Feature 1 */}
           <div className="bg-[#111828] p-8 rounded-2xl text-left">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-3xl mb-4">📷</div>
+            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-xs font-semibold tracking-wide mb-4">OCR</div>
             <h3 className="text-xl font-semibold mb-2">OCR Receipt Scanner</h3>
             <p className="text-[#94a3b8]">Scan paper receipts instantly with AI-powered OCR technology.</p>
           </div>
 
           {/* Feature 2 */}
           <div className="bg-[#111828] p-8 rounded-2xl text-left">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-3xl mb-4">📊</div>
+            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-xs font-semibold tracking-wide mb-4">DATA</div>
             <h3 className="text-xl font-semibold mb-2">Smart Analytics</h3>
             <p className="text-[#94a3b8]">Visualize spending patterns with interactive charts and insights.</p>
           </div>
 
           {/* Feature 3 */}
           <div className="bg-[#111828] p-8 rounded-2xl text-left">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-3xl mb-4">🎯</div>
+            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-xs font-semibold tracking-wide mb-4">GOAL</div>
             <h3 className="text-xl font-semibold mb-2">Goal Tracking</h3>
             <p className="text-[#94a3b8]">Set financial goals and receive AI-powered suggestions.</p>
           </div>
 
           {/* Feature 4 */}
           <div className="bg-[#111828] p-8 rounded-2xl text-left">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-3xl mb-4">🔒</div>
+            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-xs font-semibold tracking-wide mb-4">SAFE</div>
             <h3 className="text-xl font-semibold mb-2">Secure & Private</h3>
             <p className="text-[#94a3b8]">Bank-level encryption keeps your financial data safe.</p>
           </div>
@@ -131,7 +129,7 @@ function Homepage() {
       </section>
 
       {/* ================== CTA BANNER ================== */}
-      <section className="mx-5 lg:mx-[60px] mt-12 bg-gradient-to-r from-[#2563eb] to-[#22c55e] rounded-3xl py-16 px-8 text-center">
+      <section className="mx-6 lg:mx-[80px] mt-12 bg-gradient-to-r from-[#2563eb] to-[#22c55e] rounded-3xl py-16 px-8 text-center">
         <h2 className="text-[30px] font-semibold mb-3">Ready to Take Control of Your Finances?</h2>
         <p className="text-white/90 text-lg mb-8 max-w-md mx-auto">Join thousands of Nepali users managing money smarter with AI.</p>
         <button className="bg-white text-[#0a0f1f] hover:bg-white/90 px-8 py-4 rounded-2xl font-semibold text-lg transition-all">
@@ -140,7 +138,7 @@ function Homepage() {
       </section>
 
       {/* ================== FOOTER ================== */}
-      <footer className="bg-[#0f172a] py-16 px-5 md:px-[60px] mt-20">
+      <footer className="bg-[#0f172a] py-16 px-6 md:px-[80px] mt-20">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div>
             <h3 className="text-2xl font-bold mb-3">AI Finance Advisor</h3>
