@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useEntry } from "../Context/EntryContext";
 import BackButton from "../components/BackButton";
+import { parseNepaliNumber } from "../utils/nepaliNumberConverter";
 
 const cx = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -113,7 +114,7 @@ const BudgetEntry = () => {
   const handleEditEntry = (entry) => {
     setEditingId(entry.id);
     setEntryType(entry.type);
-    setAmount(entry.amount);
+    setAmount(String(entry.amount ?? ""));
     setCategory(entry.category);
     setPaymentMethod(entry.paymentMethod);
     setDate(entry.date);
@@ -143,11 +144,12 @@ const BudgetEntry = () => {
     }
 
     try {
+      const normalizedAmount = parseNepaliNumber(amount);
       if (editingId !== null) {
-        await updateEntry(editingId, { type: entryType, category, amount: parseFloat(amount), date, paymentMethod, notes });
+        await updateEntry(editingId, { type: entryType, category, amount: normalizedAmount, date, paymentMethod, notes });
         setEditingId(null);
       } else {
-        await addEntry({ type: entryType, category, amount: parseFloat(amount), date, paymentMethod, notes, originalCategory: category });
+        await addEntry({ type: entryType, category, amount: normalizedAmount, date, paymentMethod, notes, originalCategory: category });
       }
 
       setAmount("");
@@ -238,8 +240,8 @@ const BudgetEntry = () => {
                 </label>
                 <Input
                   id="amount"
-                  type="number"
-                  placeholder="e.g., 3500"
+                  type="text"
+                  placeholder="e.g., 3500 or ३५००"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                 />
@@ -249,7 +251,7 @@ const BudgetEntry = () => {
                   {quickAmounts.map((q) => (
                     <Button
                       key={q}
-                      onClick={() => setAmount(q)}
+                      onClick={() => setAmount(String(q))}
                       variant="secondary"
                       type="button"
                       className="h-8 px-2.5 text-xs"

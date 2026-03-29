@@ -7,6 +7,7 @@ import {
   CheckCircle 
 } from 'lucide-react';
 import { API_BASE_URL } from '../api';
+import { parseNepaliNumber } from '../utils/nepaliNumberConverter';
 
 const DEFAULT_CHALLENGES = [
   { id: 1, title: 'No online food delivery this month', reward: 500, completed: false, daysLeft: 12, progress: 0, total: 100 },
@@ -119,7 +120,10 @@ function GoalsAndChallengesPage() {
     fetchData();
   }, [navigate]);
 
-  const handleInputChange = e => setNewGoal({ ...newGoal, [e.target.name]: e.target.value });
+  const handleInputChange = e => {
+    const { name, value } = e.target;
+    setNewGoal({ ...newGoal, [name]: value });
+  };
 
   const handleAddGoal = async e => {
     e.preventDefault();
@@ -129,9 +133,10 @@ function GoalsAndChallengesPage() {
     }
     try {
       const token = localStorage.getItem('access_token');
+      const normalizedTarget = parseNepaliNumber(newGoal.target);
       const payload = {
         title: newGoal.title,
-        target: newGoal.target,
+        target: normalizedTarget,
         current: 0,
         deadline: newGoal.deadline,
         category: newGoal.category,
@@ -289,10 +294,10 @@ function GoalsAndChallengesPage() {
                     <label className="mb-1.5 block text-sm font-medium text-slate-300">Target (NPR)</label>
                     <Input
                       name="target"
-                      type="number"
+                      type="text"
                       value={newGoal.target}
                       onChange={handleInputChange}
-                      placeholder="150000"
+                      placeholder="150000 or \u0968\u0969\u0966\u0969\u0966\u0966"
                       required
                     />
                   </div>

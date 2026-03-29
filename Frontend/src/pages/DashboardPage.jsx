@@ -32,6 +32,13 @@ function DashboardPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
+  // Function to format currency values and remove negative signs
+  const formatCurrencyValue = (value) => {
+    if (typeof value !== "string") return value;
+    // Remove negative signs from currency values
+    return value.replace(/-\s*/, "");
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
 
@@ -47,7 +54,15 @@ function DashboardPage() {
 
     fetchDashboardOverview()
       .then((payload) => {
-        setData(payload);
+        // Process stats to remove negative signs from values
+        const processedPayload = {
+          ...payload,
+          stats: payload.stats.map((stat) => ({
+            ...stat,
+            value: formatCurrencyValue(stat.value),
+          })),
+        };
+        setData(processedPayload);
         if (payload?._source === "fallback") {
           setError("");
         } else {
