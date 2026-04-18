@@ -8,3 +8,5 @@ The app provides a user-friendly interface with insightful reports and categoriz
 - Daily / Monthly tracking
 - Filter and search transactions
 - Data persistence (local storage / database)
+
+# Tech Stack
