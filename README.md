@@ -11,4 +11,5 @@ The app provides a user-friendly interface with insightful reports and categoriz
 
 # Tech Stack
 - Frontend: React Tailwind CSS
+- Backend: Django 
   
