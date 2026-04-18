@@ -2,3 +2,4 @@ Smart Expense Tracker helps users track their income and expenses, analyze spend
 The app provides a user-friendly interface with insightful reports and categorization.
 
 Features
+Add income and expenses
