@@ -10,3 +10,5 @@ The app provides a user-friendly interface with insightful reports and categoriz
 - Data persistence (local storage / database)
 
 # Tech Stack
+- Frontend: React Tailwind CSS
+  
