@@ -6,3 +6,5 @@ The app provides a user-friendly interface with insightful reports and categoriz
 - Categorize transactions (Food, Travel, Bills, etc.)
 - Visual reports and analytics
 - Daily / Monthly tracking
+- Filter and search transactions
+- Data persistence (local storage / database)
